@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/user');
+const cors = require('cors');
 
 require('dotenv').config();
 
@@ -21,6 +22,8 @@ try {
 process.on('unhandledRejection', (error) => {
   console.log('unhandledRejection', error.message);
 });
+
+app.use(cors());
 
 // parse requests of content-type - application/json
 app.use(express.json());
