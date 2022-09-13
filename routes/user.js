@@ -10,7 +10,8 @@ router.post('/', upload.single('image'), async (req, res) => {
     const result = await cloudinary.uploader.upload(req.body.image);
     // Create new user
     let user = new User({
-      name: req.body.name,
+      // name: req.body.name,
+      name: JSON.parse(req.body.name),
       profile_img: result.secure_url,
       cloudinary_id: result.public_id,
     });
