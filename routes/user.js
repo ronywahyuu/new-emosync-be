@@ -5,7 +5,6 @@ const User = require('../models/user');
 
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    console.log('ini req file', req.file);
     // Upload image to cloudinary
     // const result = await cloudinary.uploader.upload(req.file.path);
     const result = await cloudinary.uploader.upload(req.body.image);
