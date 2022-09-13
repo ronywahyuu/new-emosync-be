@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
-  // name: String,
   name: {
     proba: {
       neutral: Number,
@@ -11,9 +10,7 @@ const userSchema = new mongoose.Schema({
       disgusted: Number,
       surprised: Number,
     },
-    predict: {
-      type: String,
-    },
+    predict: String,
   },
   profile_img: String,
   cloudinary_id: String,

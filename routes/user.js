@@ -1,9 +1,8 @@
 const router = require('express').Router();
 const cloudinary = require('../utils/cloudinary');
-const upload = require('../utils/multer');
 const User = require('../models/user');
 
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     // Upload image to cloudinary
     // const result = await cloudinary.uploader.upload(req.file.path);
@@ -52,13 +51,13 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-router.put('/:id', upload.single('image'), async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     // Delete image from cloudinary
     await cloudinary.uploader.destroy(user.cloudinary_id);
     // Upload new image to cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path);
+    const result = await cloudinary.uploader.upload(req.body.image);
     const data = {
       name: req.body.name || user.name,
       profile_img: result.secure_url || user.profile_img,
