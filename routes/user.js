@@ -8,16 +8,10 @@ router.post('/', async (req, res) => {
     // const result = await cloudinary.uploader.upload(req.file.path);
     const result = await cloudinary.uploader.upload(req.body.image);
     // Create new user
-    let user = new User({
-      name: req.body.name,
-      profile_img: result.secure_url,
-      cloudinary_id: result.public_id,
-    });
+    let user = new User({ ...req.body.data, image: result.secure_url });
     // save user details in mongodb
     await user.save();
-    res.status(200).send({
-      user,
-    });
+    res.status(200).send({ data: user });
   } catch (err) {
     console.log(err);
   }
