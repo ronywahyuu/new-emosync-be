@@ -8,13 +8,10 @@ require('dotenv').config();
 
 //Connect to database
 try {
-  mongoose.connect(
-    'mongodb+srv://test:eMwNHYwss36l4cBC@cluster0.9dxiw1h.mongodb.net/?retryWrites=true&w=majority',
-    {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    }
-  );
+  mongoose.connect(process.env.MONGODB_URL, {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+  });
   console.log('connected to db');
 } catch (error) {
   handleError(error);
