@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
     surprised: Number,
     predict: String,
     image: String,
+    meetingId: String,
   },
   { timestamps: true }
 );
