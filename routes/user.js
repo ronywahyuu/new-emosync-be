@@ -5,7 +5,7 @@ const User = require('../models/user');
 router.post('/', async (req, res) => {
   try {
     const { secure_url } = await cloudinary.uploader.upload(req.body.image);
-    const user = new User({ ...req.body.data, image: secure_url });
+    const user = new User({ ...req.body, image: secure_url });
     await user.save();
     return res.status(200).send({ data: user });
   } catch (err) {
