@@ -63,7 +63,7 @@ router.put('/:id', async (req, res) => {
       user.image.indexOf('.jpg') - 20,
       user.image.indexOf('.jpg')
     );
-    await cloudinary.uploader.destroy(user.public_id);
+    await cloudinary.uploader.destroy(public_id);
     const result = await cloudinary.uploader.upload(req.body.image);
     const data = {
       name: req.body.name || user.name,
