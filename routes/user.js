@@ -4,14 +4,10 @@ const User = require('../models/user');
 
 router.post('/', async (req, res) => {
   try {
-    // Upload image to cloudinary
-    // const result = await cloudinary.uploader.upload(req.file.path);
-    const result = await cloudinary.uploader.upload(req.body.image);
-    // Create new user
-    const user = new User({ ...req.body.data, image: result.secure_url });
-    // save user details in mongodb
+    const { secure_url } = await cloudinary.uploader.upload(req.body.image);
+    const user = new User({ ...req.body.data, image: secure_url });
     await user.save();
-    res.status(200).send({ data: user });
+    return res.status(200).send({ data: user });
   } catch (err) {
     console.log(err);
   }
@@ -19,13 +15,15 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    let user = await User.find({});
-    if (!user) {
-      res.status(404).send({
-        message: 'User not found!',
-      });
+    const { name, meetingId } = req.query;
+    const user = await User.find({
+      ...(name && { name }),
+      ...(meetingId && { meetingId }),
+    }).exec();
+    if (!user.length) {
+      return res.status(404).send({ message: 'Data not found!' });
     }
-    res.status(200).send(user);
+    return res.status(200).send({ data: user });
   } catch (err) {
     console.log(err);
   }
@@ -33,13 +31,11 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    let user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id);
     if (!user) {
-      res.status(404).send({
-        message: 'User not found!',
-      });
+      return res.status(404).send({ message: 'User not found!' });
     }
-    res.status(200).send(user);
+    return res.status(200).send({ data: user });
   } catch (err) {
     console.log(err);
   }
@@ -47,13 +43,14 @@ router.get('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    // Find user by id
-    let user = await User.findById(req.params.id);
-    // Delete image from cloudinary
-    await cloudinary.uploader.destroy(user.cloudinary_id);
-    // Delete user from db
+    const user = await User.findById(req.params.id);
+    const public_id = user.image.substring(
+      user.image.indexOf('.jpg') - 20,
+      user.image.indexOf('.jpg')
+    );
+    await cloudinary.uploader.destroy(public_id);
     await user.remove();
-    res.json(user);
+    return res.json(user);
   } catch (err) {
     console.log(err);
   }
@@ -62,19 +59,20 @@ router.delete('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-    // Delete image from cloudinary
-    await cloudinary.uploader.destroy(user.cloudinary_id);
-    // Upload new image to cloudinary
+    const public_id = user.image.substring(
+      user.image.indexOf('.jpg') - 20,
+      user.image.indexOf('.jpg')
+    );
+    await cloudinary.uploader.destroy(user.public_id);
     const result = await cloudinary.uploader.upload(req.body.image);
     const data = {
       name: req.body.name || user.name,
-      profile_img: result.secure_url || user.profile_img,
-      cloudinary_id: result.public_id || user.cloudinary_id,
+      image: result.secure_url || user.image,
     };
     const userUpdated = await User.findByIdAndUpdate(req.params.id, data, {
       new: true,
     });
-    res.json(userUpdated);
+    return res.json(userUpdated);
   } catch (err) {
     console.log(err);
   }
