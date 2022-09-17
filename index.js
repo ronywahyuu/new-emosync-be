@@ -1,7 +1,8 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const userRoutes = require('./routes/user');
+const dataRoutes = require('./routes/data');
+const reportRoutes = require('./routes/report');
 const cors = require('cors');
 
 require('dotenv').config();
@@ -27,7 +28,8 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/user', userRoutes);
+app.use('/data', dataRoutes);
+app.use('/report', reportRoutes);
 
 app.listen(process.env.PORT || 8080, function () {
   console.log('App running!');

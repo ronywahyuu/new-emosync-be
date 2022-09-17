@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema(
+const recognitionSchema = new mongoose.Schema(
   {
     neutral: Number,
     happy: Number,
@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.set('toJSON', {
+recognitionSchema.set('toJSON', {
   virtuals: true,
   versionKey: false,
   transform: (_, ret) => {
@@ -25,4 +25,4 @@ userSchema.set('toJSON', {
   },
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Recognition', recognitionSchema);
