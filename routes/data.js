@@ -2,6 +2,17 @@ const router = require('express').Router();
 const cloudinary = require('../utils/cloudinary');
 const Recognition = require('../models/recognition');
 
+router.post('/', async (req, res) => {
+  try {
+    const { secure_url } = await cloudinary.uploader.upload(req.body.image);
+    const recognition = new Recognition({ ...req.body, image: secure_url });
+    await recognition.save();
+    return res.status(200).send({ data: recognition });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 router.get('/', async (req, res) => {
   try {
     const { name, meetingId } = req.query;
@@ -61,9 +72,7 @@ router.put('/:id', async (req, res) => {
     const recognitionUpdated = await Recognition.findByIdAndUpdate(
       req.params.id,
       data,
-      {
-        new: true,
-      }
+      { new: true }
     );
     return res.status(200).send({ data: recognitionUpdated });
   } catch (err) {
