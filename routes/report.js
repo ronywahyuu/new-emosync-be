@@ -62,9 +62,10 @@ router.get('/summary', async (req, res) => {
         .map(({ surprised }) => surprised)
         .reduce((prev, next) => prev + next, 0),
     ];
-    const summary = recognitionParsed.map(
-      (item) =>
+    const summary = recognitionParsed.map((item) =>
+      Math.round(
         (item / recognitionParsed.reduce((prev, next) => prev + next, 0)) * 100
+      )
     );
     return res.status(200).send({ data: { labels, summary } });
   } catch (err) {
