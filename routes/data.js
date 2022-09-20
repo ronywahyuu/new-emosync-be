@@ -29,6 +29,18 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/meetingId', async (_, res) => {
+  try {
+    const recognition = await Recognition.distinct('meetingId').exec();
+    if (!recognition.length) {
+      return res.status(404).send({ message: 'Data not found!' });
+    }
+    return res.status(201).send({ data: recognition });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const recognition = await Recognition.findById(req.params.id);
