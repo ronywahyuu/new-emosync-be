@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "lintfix": "prettier --write . && eslint --fix .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -20,6 +21,8 @@
     "mongoose": "^6.6.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.19"
+    "eslint": "^8.23.1",
+    "nodemon": "^2.0.19",
+    "prettier": "^2.7.1"
   }
 }

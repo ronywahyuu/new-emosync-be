@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const recognitionSchema = new mongoose.Schema(
   {
@@ -15,14 +15,14 @@ const recognitionSchema = new mongoose.Schema(
     meetingId: String,
   },
   { timestamps: true }
-);
+)
 
 recognitionSchema.set('toJSON', {
   virtuals: true,
   versionKey: false,
   transform: (_, ret) => {
-    delete ret._id;
+    delete ret._id
   },
-});
+})
 
-module.exports = mongoose.model('Recognition', recognitionSchema);
+module.exports = mongoose.model('Recognition', recognitionSchema)
