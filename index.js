@@ -5,17 +5,19 @@ const dataRoutes = require('./routes/data')
 const cors = require('cors')
 require('dotenv').config()
 
-try {
-  mongoose.connect(process.env.MONGODB_URL, {
+mongoose
+  .connect(process.env.MONGODB_URL, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
   })
-  console.log('Connected to DB')
-} catch (error) {
-  console.log(error)
-}
-process.on('unhandledRejection', (error) => {
-  console.log('unhandledRejection', error.message)
+  .then(() => {
+    console.log('Connected to DB')
+  })
+  .catch(({ message }) => {
+    console.log(message)
+  })
+process.on('unhandledRejection', ({ message }) => {
+  console.log('unhandledRejection', message)
 })
 
 const app = express()
