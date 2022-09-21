@@ -29,9 +29,26 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.get('/meetingId', async (_, res) => {
+router.get('/meeting-id', async (_, res) => {
   try {
     const recognition = await Recognition.distinct('meetingId').exec()
+    if (!recognition.length) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(201).send({ data: recognition })
+  } catch (err) {
+    console.log(err)
+  }
+})
+
+router.get('/student-name', async (req, res) => {
+  try {
+    const { meetingId } = req.query
+    const recognition = await Recognition.find({
+      ...(meetingId && { meetingId }),
+    })
+      .distinct('name')
+      .exec()
     if (!recognition.length) {
       return res.status(404).send({ message: 'Data not found!' })
     }
