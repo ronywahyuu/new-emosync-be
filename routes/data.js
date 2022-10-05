@@ -1,6 +1,12 @@
 const router = require('express').Router()
 const cloudinary = require('../utils/cloudinary')
 const Recognition = require('../models/recognition')
+const { auth } = require('express-oauth2-jwt-bearer')
+
+const checkJwt = auth({
+  audience: process.env.AUTH0_AUDIENCE,
+  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
+})
 
 router.post('/', async (req, res) => {
   try {
@@ -13,7 +19,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.get('/', async (req, res) => {
+router.get('/', checkJwt, async (req, res) => {
   try {
     const { name, meetingId } = req.query
     const recognition = await Recognition.find({
@@ -29,7 +35,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.get('/meeting-id', async (_, res) => {
+router.get('/meeting-id', checkJwt, async (_, res) => {
   try {
     const recognition = await Recognition.distinct('meetingId').exec()
     if (!recognition.length) {
@@ -41,7 +47,7 @@ router.get('/meeting-id', async (_, res) => {
   }
 })
 
-router.get('/student-name', async (req, res) => {
+router.get('/student-name', checkJwt, async (req, res) => {
   try {
     const { meetingId } = req.query
     const recognition = await Recognition.find({
@@ -58,7 +64,7 @@ router.get('/student-name', async (req, res) => {
   }
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', checkJwt, async (req, res) => {
   try {
     const recognition = await Recognition.findById(req.params.id)
     if (!recognition) {
@@ -70,7 +76,7 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', checkJwt, async (req, res) => {
   try {
     const recognition = await Recognition.findById(req.params.id)
     const public_id = recognition.image.substring(
@@ -85,7 +91,7 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', checkJwt, async (req, res) => {
   try {
     const recognition = await Recognition.findById(req.params.id)
     const public_id = recognition.image.substring(
