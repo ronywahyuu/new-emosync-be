@@ -13,7 +13,7 @@ router.post('/', async (req, res) => {
     const { secure_url } = await cloudinary.uploader.upload(req.body.image)
     const recognition = new Recognition({ ...req.body, image: secure_url })
     await recognition.save()
-    return res.status(200).send({ data: recognition })
+    return res.status(201).send({ data: recognition })
   } catch (err) {
     console.log(err)
   }
@@ -29,7 +29,7 @@ router.get('/', checkJwt, async (req, res) => {
     if (!recognition.length) {
       return res.status(404).send({ message: 'Data not found!' })
     }
-    return res.status(201).send({ data: recognition })
+    return res.status(200).send({ data: recognition })
   } catch (err) {
     console.log(err)
   }
@@ -41,7 +41,7 @@ router.get('/meeting-id', checkJwt, async (_, res) => {
     if (!recognition.length) {
       return res.status(404).send({ message: 'Data not found!' })
     }
-    return res.status(201).send({ data: recognition })
+    return res.status(200).send({ data: recognition })
   } catch (err) {
     console.log(err)
   }
@@ -58,7 +58,7 @@ router.get('/student-name', checkJwt, async (req, res) => {
     if (!recognition.length) {
       return res.status(404).send({ message: 'Data not found!' })
     }
-    return res.status(201).send({ data: recognition })
+    return res.status(200).send({ data: recognition })
   } catch (err) {
     console.log(err)
   }
