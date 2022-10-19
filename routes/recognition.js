@@ -71,7 +71,7 @@ router.post('/', checkJwt, async (req, res) => {
     if (!data) {
       return res.status(404).send({ message: "Data can't be saved!" })
     }
-    return res.status(200).send({ data })
+    return res.status(201).send({ data })
   } catch (err) {
     console.log(err)
   }
