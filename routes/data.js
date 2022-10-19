@@ -19,7 +19,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.get('/', checkJwt, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { name, meetingId } = req.query
     const recognition = await Recognition.find({
