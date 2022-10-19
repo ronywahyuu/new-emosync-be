@@ -103,7 +103,7 @@ router.delete('/:id', checkJwt, async (req, res) => {
     const { id } = req.params
     const data = await Recognition.findById(id)
     if (!data) {
-      return res.status(404).send({ message: "Data can't be found!" })
+      return res.status(404).send({ message: 'Data not found!' })
     }
     const public_id = data.image.substring(
       data.image.indexOf('.jpg') - 20,

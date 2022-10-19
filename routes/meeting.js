@@ -52,4 +52,34 @@ router.post('/', checkJwt, async (req, res) => {
   }
 })
 
+router.put('/:id', checkJwt, async (req, res) => {
+  try {
+    const { id } = req.params
+    const data = await Meeting.findByIdAndUpdate(id, req.body, {
+      upsert: true,
+      new: true,
+    })
+    if (!data) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (err) {
+    console.log(err)
+  }
+})
+
+router.delete('/:id', checkJwt, async (req, res) => {
+  try {
+    const { id } = req.params
+    const data = await Meeting.findById(id)
+    if (!data) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    await data.remove()
+    return res.status(200).send({ data })
+  } catch (err) {
+    console.log(err)
+  }
+})
+
 module.exports = router

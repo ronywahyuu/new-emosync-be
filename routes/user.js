@@ -79,7 +79,7 @@ router.delete('/:id', checkJwt, async (req, res) => {
     const { id } = req.params
     const data = await User.findById(id)
     if (!data) {
-      return res.status(404).send({ message: "Data can't be found!" })
+      return res.status(404).send({ message: 'Data not found!' })
     }
     await data.remove()
     return res.status(200).send({ data })
