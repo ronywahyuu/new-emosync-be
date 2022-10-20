@@ -1,17 +1,12 @@
 const router = require('express').Router()
 const User = require('../models/user')
-const { auth } = require('express-oauth2-jwt-bearer')
+const auth = require('../middleware/auth')
 
-const checkJwt = auth({
-  audience: process.env.AUTH0_AUDIENCE,
-  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
-})
-
-router.get('/', checkJwt, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
-    const { id, meetingId, recognitionId } = req.query
+    const { role, meetingId, recognitionId } = req.query
     const data = await User.find({
-      ...(id && { _id: id }),
+      ...(role && { role }),
       ...(meetingId && { meetingId }),
       ...(recognitionId && { recognitionId }),
     })
@@ -26,7 +21,7 @@ router.get('/', checkJwt, async (req, res) => {
   }
 })
 
-router.get('/:id', checkJwt, async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params
     const data = await User.findById(id).select('-meetings -recognitions')
@@ -39,7 +34,7 @@ router.get('/:id', checkJwt, async (req, res) => {
   }
 })
 
-router.post('/', checkJwt, async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const { email } = req.body
     const user = await User.findOne({ email })
@@ -57,7 +52,7 @@ router.post('/', checkJwt, async (req, res) => {
   }
 })
 
-router.put('/', checkJwt, async (req, res) => {
+router.put('/', auth, async (req, res) => {
   try {
     const { sub: userId } = req.auth.payload
     const user = await User.findOne({ userId })
@@ -74,7 +69,7 @@ router.put('/', checkJwt, async (req, res) => {
   }
 })
 
-router.delete('/:id', checkJwt, async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params
     const data = await User.findById(id)

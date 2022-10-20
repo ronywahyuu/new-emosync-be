@@ -1,13 +1,8 @@
 const router = require('express').Router()
 const Meeting = require('../models/meeting')
-const { auth } = require('express-oauth2-jwt-bearer')
+const auth = require('../middleware/auth')
 
-const checkJwt = auth({
-  audience: process.env.AUTH0_AUDIENCE,
-  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
-})
-
-router.get('/', checkJwt, async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const { userId, recognitionId } = req.query
     const data = await Meeting.find({
@@ -25,7 +20,7 @@ router.get('/', checkJwt, async (req, res) => {
   }
 })
 
-router.get('/:id', checkJwt, async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params
     const data = await Meeting.findById(id).select('-recognitions -users')
@@ -38,7 +33,7 @@ router.get('/:id', checkJwt, async (req, res) => {
   }
 })
 
-router.post('/', checkJwt, async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     console.log(req.body)
     const data = new Meeting(req.body)
@@ -52,7 +47,7 @@ router.post('/', checkJwt, async (req, res) => {
   }
 })
 
-router.put('/:id', checkJwt, async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params
     const data = await Meeting.findByIdAndUpdate(id, req.body, {
@@ -68,7 +63,7 @@ router.put('/:id', checkJwt, async (req, res) => {
   }
 })
 
-router.delete('/:id', checkJwt, async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params
     const data = await Meeting.findById(id)

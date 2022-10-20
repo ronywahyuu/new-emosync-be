@@ -33,6 +33,9 @@ app.use('/data', dataRoutes)
 app.use('/meeting', meetingRoutes)
 app.use('/user', userRoutes)
 app.use('/recognition', recognitionRoutes)
+app.get('/', async (_, res) =>
+  res.status(200).send({ message: 'server running well' })
+)
 
 const httpServer = http.createServer(app)
 require('./utils/socketio')(httpServer)

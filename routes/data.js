@@ -1,14 +1,9 @@
 const router = require('express').Router()
 const cloudinary = require('../utils/cloudinary')
 const Recognition = require('../models/recognition')
-const { auth } = require('express-oauth2-jwt-bearer')
+const auth = require('../middleware/auth')
 
-const checkJwt = auth({
-  audience: process.env.AUTH0_AUDIENCE,
-  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}/`,
-})
-
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const { secure_url } = await cloudinary.uploader.upload(req.body.image)
     const recognition = new Recognition({ ...req.body, image: secure_url })
@@ -19,7 +14,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
     const { name, meetingId } = req.query
     const recognition = await Recognition.find({
@@ -35,7 +30,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.get('/meeting-id', checkJwt, async (_, res) => {
+router.get('/meeting-id', auth, async (_, res) => {
   try {
     const recognition = await Recognition.distinct('meetingId').exec()
     if (!recognition.length) {
@@ -47,7 +42,7 @@ router.get('/meeting-id', checkJwt, async (_, res) => {
   }
 })
 
-router.get('/student-name', checkJwt, async (req, res) => {
+router.get('/student-name', auth, async (req, res) => {
   try {
     const { meetingId } = req.query
     const recognition = await Recognition.find({
@@ -64,7 +59,7 @@ router.get('/student-name', checkJwt, async (req, res) => {
   }
 })
 
-router.get('/:id', checkJwt, async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
     const recognition = await Recognition.findById(req.params.id)
     if (!recognition) {
@@ -76,7 +71,7 @@ router.get('/:id', checkJwt, async (req, res) => {
   }
 })
 
-router.delete('/:id', checkJwt, async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     const recognition = await Recognition.findById(req.params.id)
     const public_id = recognition.image.substring(
@@ -91,7 +86,7 @@ router.delete('/:id', checkJwt, async (req, res) => {
   }
 })
 
-router.put('/:id', checkJwt, async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   try {
     const recognition = await Recognition.findById(req.params.id)
     const public_id = recognition.image.substring(

@@ -7,6 +7,11 @@ const userSchema = new mongoose.Schema(
     userId: String,
     email: String,
     picture: String,
+    role: {
+      type: String,
+      enum: ['student', 'teacher'],
+      default: 'student',
+    },
     meetings: [
       {
         type: mongoose.Schema.Types.ObjectId,
