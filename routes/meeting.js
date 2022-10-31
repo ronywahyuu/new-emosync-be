@@ -35,7 +35,6 @@ router.get('/:id', auth, async (req, res) => {
 
 router.post('/', auth, async (req, res) => {
   try {
-    console.log(req.body)
     const data = new Meeting(req.body)
     await data.save()
     if (!data) {

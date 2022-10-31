@@ -1,14 +1,15 @@
 const router = require('express').Router()
 const User = require('../models/user')
+const mongoose = require('mongoose')
 const auth = require('../middleware/auth')
 
 router.get('/', auth, async (req, res) => {
   try {
-    const { role, meetingId, recognitionId } = req.query
+    const { role, meetings, recognitions } = req.query
     const data = await User.find({
       ...(role && { role }),
-      ...(meetingId && { meetingId }),
-      ...(recognitionId && { recognitionId }),
+      ...(meetings && { meetings: mongoose.Types.ObjectId(meetings) }),
+      ...(recognitions && { recognitions: mongoose.Types.ObjectId(meetings) }),
     })
       .select('-meetings -recognitions')
       .sort({ createdAt: 'desc' })
@@ -55,11 +56,10 @@ router.post('/', auth, async (req, res) => {
 router.put('/', auth, async (req, res) => {
   try {
     const { sub: userId } = req.auth.payload
-    const user = await User.findOne({ userId })
-    const data = await User.findOneAndUpdate({ email: user.email }, req.body, {
+    const data = await User.findOneAndUpdate({ userId }, req.body, {
       upsert: true,
       new: true,
-    })
+    }).select('-meetings -recognitions')
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }
