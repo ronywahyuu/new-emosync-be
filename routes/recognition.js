@@ -100,14 +100,26 @@ router.get('/:id', auth, async (req, res) => {
         {
           $project: {
             positive: {
-              $round: {
-                $multiply: [{ $divide: ['$positive', '$count'] }, 100],
-              },
+              $cond: [
+                { $eq: ['$count', 0] },
+                0,
+                {
+                  $round: {
+                    $multiply: [{ $divide: ['$positive', '$count'] }, 100],
+                  },
+                },
+              ],
             },
             negative: {
-              $round: {
-                $multiply: [{ $divide: ['$negative', '$count'] }, 100],
-              },
+              $cond: [
+                { $eq: ['$count', 0] },
+                0,
+                {
+                  $round: {
+                    $multiply: [{ $divide: ['$negative', '$count'] }, 100],
+                  },
+                },
+              ],
             },
           },
         },
@@ -235,14 +247,26 @@ router.get('/:id/:userId', auth, async (req, res) => {
         {
           $project: {
             positive: {
-              $round: {
-                $multiply: [{ $divide: ['$positive', '$count'] }, 100],
-              },
+              $cond: [
+                { $eq: ['$count', 0] },
+                0,
+                {
+                  $round: {
+                    $multiply: [{ $divide: ['$positive', '$count'] }, 100],
+                  },
+                },
+              ],
             },
             negative: {
-              $round: {
-                $multiply: [{ $divide: ['$negative', '$count'] }, 100],
-              },
+              $cond: [
+                { $eq: ['$count', 0] },
+                0,
+                {
+                  $round: {
+                    $multiply: [{ $divide: ['$negative', '$count'] }, 100],
+                  },
+                },
+              ],
             },
           },
         },
