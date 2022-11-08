@@ -1,10 +1,7 @@
 const Meeting = require('../models/meeting')
 
-const get = async (userId, recognitionId) => {
-  return await Meeting.find({
-    ...(userId && { userId }),
-    ...(recognitionId && { recognitionId }),
-  })
+const get = async (role, createdBy) => {
+  return await Meeting.find(role.includes('superadmin') ? {} : { createdBy })
     .select('-recognitions -users')
     .sort({ createdAt: 'desc' })
 }
@@ -13,8 +10,12 @@ const getById = async (id) => {
   return await Meeting.findById(id).select('-recognitions -users')
 }
 
-const create = async (body) => {
-  const data = new Meeting(body)
+const getCount = async (role, createdBy) => {
+  return await Meeting.count(role.includes('superadmin') ? {} : { createdBy })
+}
+
+const create = async (body, createdBy) => {
+  const data = new Meeting({ ...body, createdBy })
   return await data.save()
 }
 
@@ -34,6 +35,7 @@ const remove = async (id) => {
 module.exports = {
   get,
   getById,
+  getCount,
   create,
   update,
   remove,

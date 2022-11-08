@@ -26,6 +26,40 @@ const getById = async (req, res, next) => {
   }
 }
 
+const getOverview = async (req, res, next) => {
+  try {
+    const {
+      'https://api-fer-graphql.fly.dev/role': role,
+      'https://api-fer-graphql.fly.dev/id': createdBy,
+    } = req.auth.payload
+    const data = await recognition.getOverview(role, createdBy)
+    if (!data?.datas?.length) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
+const getSummary = async (req, res, next) => {
+  try {
+    const {
+      'https://api-fer-graphql.fly.dev/role': role,
+      'https://api-fer-graphql.fly.dev/id': createdBy,
+    } = req.auth.payload
+    const data = await recognition.getSummary(role, createdBy)
+    if (!data?.datas?.length) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
 const create = async (req, res, next) => {
   try {
     const { sub: userId } = req.auth.payload
@@ -70,6 +104,8 @@ const remove = async (req, res, next) => {
 module.exports = {
   get,
   getById,
+  getOverview,
+  getSummary,
   create,
   update,
   remove,

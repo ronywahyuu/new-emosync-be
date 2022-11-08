@@ -6,6 +6,10 @@ const meetingSchema = new mongoose.Schema(
     description: String,
     isStart: { type: Boolean, default: false },
     startedAt: { type: Date, default: Date.now },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
     users: [
       {
         type: mongoose.Schema.Types.ObjectId,

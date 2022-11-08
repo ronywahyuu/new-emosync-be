@@ -298,6 +298,122 @@ const getById = async (id, userId) => {
   }
 }
 
+const getOverview = async (role, createdBy) => {
+  const getMeetingIds = async () => {
+    const currentMeeting = await Meeting.find({
+      ...(!role.includes('superadmin') && { createdBy }),
+    })
+      .select('_id')
+      .lean()
+    return currentMeeting.map(({ _id }) => _id)
+  }
+  const data = await Recognition.aggregate([
+    {
+      $match: { meeting: { $in: await getMeetingIds() } },
+    },
+    {
+      $group: {
+        _id: null,
+        neutral: { $avg: '$neutral' },
+        happy: { $avg: '$happy' },
+        sad: { $avg: '$sad' },
+        angry: { $avg: '$angry' },
+        fearful: { $avg: '$fearful' },
+        disgusted: { $avg: '$disgusted' },
+        surprised: { $avg: '$surprised' },
+      },
+    },
+    {
+      $project: {
+        neutral: { $round: { $multiply: ['$neutral', 100] } },
+        happy: { $round: { $multiply: ['$happy', 100] } },
+        sad: { $round: { $multiply: ['$sad', 100] } },
+        angry: { $round: { $multiply: ['$angry', 100] } },
+        fearful: { $round: { $multiply: ['$fearful', 100] } },
+        disgusted: { $round: { $multiply: ['$disgusted', 100] } },
+        surprised: { $round: { $multiply: ['$surprised', 100] } },
+      },
+    },
+    { $unset: ['_id'] },
+  ])
+  const labels = [
+    'Neutral',
+    'Happy',
+    'Sad',
+    'Angry',
+    'Fearful',
+    'Disgusted',
+    'Surprised',
+  ]
+  return { labels, datas: Object.values(data[0] || {}) }
+}
+
+const getSummary = async (role, createdBy) => {
+  const getMeetingIds = async () => {
+    const currentMeeting = await Meeting.find({
+      ...(!role.includes('superadmin') && { createdBy }),
+    })
+      .select('_id')
+      .lean()
+    return currentMeeting.map(({ _id }) => _id)
+  }
+  const data = await Recognition.aggregate([
+    {
+      $match: { meeting: { $in: await getMeetingIds() } },
+    },
+    {
+      $group: {
+        _id: null,
+        positive: { $sum: { $add: ['$happy', '$surprised'] } },
+        negative: {
+          $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] },
+        },
+        count: {
+          $sum: {
+            $add: [
+              '$happy',
+              '$sad',
+              '$angry',
+              '$fearful',
+              '$disgusted',
+              '$surprised',
+            ],
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        positive: {
+          $cond: [
+            { $eq: ['$count', 0] },
+            0,
+            {
+              $round: {
+                $multiply: [{ $divide: ['$positive', '$count'] }, 100],
+              },
+            },
+          ],
+        },
+        negative: {
+          $cond: [
+            { $eq: ['$count', 0] },
+            0,
+            {
+              $round: {
+                $multiply: [{ $divide: ['$negative', '$count'] }, 100],
+              },
+            },
+          ],
+        },
+      },
+    },
+    { $unset: ['_id', 'count'] },
+  ])
+  const labels = ['Positive', 'Negative']
+  return { labels, datas: Object.values(data[0] || {}) }
+}
+
 const create = async (userId, meetingId, image, rest) => {
   const [user, meeting] = await Promise.all([
     User.findOne({ userId }),
@@ -359,6 +475,8 @@ const remove = async (id) => {
 module.exports = {
   get,
   getById,
+  getOverview,
+  getSummary,
   create,
   update,
   remove,

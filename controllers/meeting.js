@@ -2,8 +2,11 @@ const meeting = require('../services/meeting')
 
 const get = async (req, res, next) => {
   try {
-    const { userId, recognitionId } = req.query
-    const data = await meeting.get(userId, recognitionId)
+    const {
+      'https://api-fer-graphql.fly.dev/role': role,
+      'https://api-fer-graphql.fly.dev/id': createdBy,
+    } = req.auth.payload
+    const data = await meeting.get(role, createdBy)
     if (!data.length) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -27,9 +30,27 @@ const getById = async (req, res, next) => {
   }
 }
 
+const getCount = async (req, res, next) => {
+  try {
+    const {
+      'https://api-fer-graphql.fly.dev/role': role,
+      'https://api-fer-graphql.fly.dev/id': createdBy,
+    } = req.auth.payload
+    const data = await meeting.getCount(role, createdBy)
+    if (data === undefined) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
 const create = async (req, res, next) => {
   try {
-    const data = await meeting.create(req.body)
+    const { 'https://api-fer-graphql.fly.dev/id': createdBy } = req.auth.payload
+    const data = await meeting.create(req.body, createdBy)
     if (!data) {
       return res.status(404).send({ message: "Data can't be saved!" })
     }
@@ -69,6 +90,7 @@ const remove = async (req, res, next) => {
 module.exports = {
   get,
   getById,
+  getCount,
   create,
   update,
   remove,

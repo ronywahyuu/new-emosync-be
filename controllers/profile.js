@@ -2,8 +2,8 @@ const profile = require('../services/profile')
 
 const get = async (req, res, next) => {
   try {
-    const { sub: userId } = req.auth.payload
-    const data = await profile.get(userId)
+    const { 'https://api-fer-graphql.fly.dev/id': id } = req.auth.payload
+    const data = await profile.get(id)
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }
