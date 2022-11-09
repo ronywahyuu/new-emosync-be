@@ -2,7 +2,7 @@ const recognition = require('../services/recognition')
 
 const get = async (req, res, next) => {
   try {
-    const data = await recognition.get(req.params.id)
+    const data = await recognition.get(req.params.id, req.query.limit)
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -15,7 +15,11 @@ const get = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    const data = await recognition.getById(req.params.id, req.params.userId)
+    const data = await recognition.getById(
+      req.params.id,
+      req.params.userId,
+      req.query.limit
+    )
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }

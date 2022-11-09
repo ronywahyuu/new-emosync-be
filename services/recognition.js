@@ -4,7 +4,7 @@ const Meeting = require('../models/meeting')
 const User = require('../models/user')
 const cloudinary = require('../utils/cloudinary')
 
-const get = async (id) => {
+const get = async (id, limit) => {
   const [
     meeting,
     recognitionDetail,
@@ -37,6 +37,8 @@ const get = async (id) => {
           surprised: { $round: ['$surprised', 2] },
         },
       },
+      { $sort: { _id: -1 } },
+      ...(limit ? [{ $limit: parseInt(limit, 10) }] : []),
       { $sort: { _id: 1 } },
     ]),
     Recognition.aggregate([
@@ -158,7 +160,7 @@ const get = async (id) => {
   }
 }
 
-const getById = async (id, userId) => {
+const getById = async (id, userId, limit) => {
   const [
     meeting,
     user,
@@ -168,9 +170,22 @@ const getById = async (id, userId) => {
   ] = await Promise.all([
     Meeting.findById(id).select('-users -recognitions').lean(),
     User.findById(userId).select('-meetings -recognitions').lean(),
-    Recognition.find({ meeting: id, user: userId })
-      .select('-meeting -user')
-      .lean(),
+    limit
+      ? Recognition.aggregate([
+          {
+            $match: {
+              meeting: mongoose.Types.ObjectId(id),
+              user: mongoose.Types.ObjectId(userId),
+            },
+          },
+          { $sort: { createdAt: -1 } },
+          { $limit: parseInt(limit, 10) },
+          { $sort: { createdAt: 1 } },
+        ])
+      : Recognition.find({
+          meeting: id,
+          user: userId,
+        }).select('-meeting -user'),
     Recognition.aggregate([
       {
         $match: {
