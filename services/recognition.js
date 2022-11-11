@@ -5,6 +5,8 @@ const User = require('../models/user')
 const cloudinary = require('../utils/cloudinary')
 const io = require('../utils/socketio')
 
+let recognitionInterval = {}
+
 const get = async (id, limit) => {
   const [
     meeting,
@@ -465,7 +467,16 @@ const create = async (userId, meetingId, image, rest) => {
   return data
 }
 
-const update = async (id, isStart) => {
+const update = async (id, isStart, meetingId) => {
+  if (isStart) {
+    recognitionInterval[meetingId] = setInterval(() => {
+      const socket = io()
+      socket.emit(meetingId, new Date())
+    }, 5000)
+  } else {
+    clearInterval(recognitionInterval[meetingId])
+    delete recognitionInterval[meetingId]
+  }
   const data = await Meeting.findByIdAndUpdate(
     id,
     {

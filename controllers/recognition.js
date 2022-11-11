@@ -81,7 +81,11 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const data = await recognition.update(req.params.id, req.body.isStart)
+    const data = await recognition.update(
+      req.params.id,
+      req.body.isStart,
+      req.body.meetingId
+    )
     if (!data) {
       return res.status(404).send({ message: "Data can't be saved!" })
     }
