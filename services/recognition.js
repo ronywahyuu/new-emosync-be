@@ -3,6 +3,7 @@ const Recognition = require('../models/recognition')
 const Meeting = require('../models/meeting')
 const User = require('../models/user')
 const cloudinary = require('../utils/cloudinary')
+const io = require('../utils/socketio')
 
 const get = async (id, limit) => {
   const [
@@ -459,6 +460,8 @@ const create = async (userId, meetingId, image, rest) => {
     }),
   ])
   if (!data) return
+  const socket = io()
+  socket.emit('RECOGNITION_DATA_ADDED')
   return data
 }
 
