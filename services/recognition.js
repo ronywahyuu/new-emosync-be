@@ -463,7 +463,7 @@ const create = async (userId, meetingId, image, rest) => {
   ])
   if (!data) return
   const socket = io()
-  socket.emit('RECOGNITION_DATA_ADDED')
+  socket.emit('RECOGNITION_DATA_ADDED', { user: user.id, meeting: meeting.id })
   return data
 }
 
