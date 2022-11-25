@@ -440,7 +440,9 @@ const create = async ({ userId, code, image, rest }) => {
   const data = await recognition.save()
   if (!data) return
   const socket = io()
-  socket.emit('RECOGNITION_DATA_ADDED', { userId, meetingId })
+  socket
+    .to([meetingId.toString(), `${meetingId.toString()}-${userId}`])
+    .emit('RECOGNITION_DATA_ADDED')
   return data
 }
 
@@ -448,7 +450,7 @@ const update = async ({ id, isStart, code }) => {
   if (isStart) {
     recognitionInterval[code] = setInterval(() => {
       const socket = io()
-      socket.emit(code, new Date())
+      socket.to('student').emit(code, new Date())
     }, 5000)
   } else {
     clearInterval(recognitionInterval[code])

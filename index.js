@@ -38,6 +38,7 @@ app.use('/', index)
 
 const httpServer = http.createServer(app)
 require('./utils/socketio')(httpServer)
+require('./utils/socketioRoom')
 
 httpServer.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`)
