@@ -428,8 +428,7 @@ const getSummary = async ({ role, createdBy }) => {
   return data[0] ? { labels, datas: Object.values(data[0]) } : {}
 }
 
-const create = async ({ userId, code, image, rest }) => {
-  const { _id: meetingId } = await Meeting.findOne({ code }).select('id')
+const create = async ({ userId, meetingId, image, rest }) => {
   const { secure_url } = await cloudinary.uploader.upload(image)
   const recognition = new Recognition({
     ...rest,
@@ -441,21 +440,12 @@ const create = async ({ userId, code, image, rest }) => {
   if (!data) return
   const socket = io()
   socket
-    .to([meetingId.toString(), `${meetingId.toString()}-${userId}`])
+    .to([meetingId, `${meetingId}-${userId}`])
     .emit('RECOGNITION_DATA_ADDED')
   return data
 }
 
 const update = async ({ id, isStart, code }) => {
-  if (isStart) {
-    recognitionInterval[code] = setInterval(() => {
-      const socket = io()
-      socket.to(`student-${code}`).emit(code, new Date())
-    }, 5000)
-  } else {
-    clearInterval(recognitionInterval[code])
-    delete recognitionInterval[code]
-  }
   const data = await Meeting.findByIdAndUpdate(
     id,
     {
@@ -464,6 +454,17 @@ const update = async ({ id, isStart, code }) => {
     },
     { new: true }
   )
+  if (isStart) {
+    recognitionInterval[code] = setInterval(() => {
+      const socket = io()
+      socket
+        .to(`student-${code}`)
+        .emit('SEND_RECOGNITION_DATA', { meetingId: id, datetime: new Date() })
+    }, 5000)
+  } else {
+    clearInterval(recognitionInterval[code])
+    delete recognitionInterval[code]
+  }
   if (!data) return
   return data
 }
