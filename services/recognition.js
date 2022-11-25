@@ -450,7 +450,7 @@ const update = async ({ id, isStart, code }) => {
   if (isStart) {
     recognitionInterval[code] = setInterval(() => {
       const socket = io()
-      socket.to('student').emit(code, new Date())
+      socket.to(`student-${code}`).emit(code, new Date())
     }, 5000)
   } else {
     clearInterval(recognitionInterval[code])
