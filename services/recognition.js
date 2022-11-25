@@ -7,16 +7,16 @@ const io = require('../utils/socketio')
 
 let recognitionInterval = {}
 
-const get = async (id, limit) => {
+const get = async ({ id, limit }) => {
   const [
     meeting,
     recognitionDetail,
     recognitionsOverview,
     recognitionsSummary,
   ] = await Promise.all([
-    Meeting.findById(id).select('-users -recognitions').lean(),
+    Meeting.findById(id).lean(),
     Recognition.aggregate([
-      { $match: { meeting: mongoose.Types.ObjectId(id) } },
+      { $match: { meetingId: mongoose.Types.ObjectId(id) } },
       {
         $group: {
           _id: { $toString: '$createdAt' },
@@ -46,7 +46,7 @@ const get = async (id, limit) => {
     ]),
     Recognition.aggregate([
       {
-        $match: { meeting: mongoose.Types.ObjectId(id) },
+        $match: { meetingId: mongoose.Types.ObjectId(id) },
       },
       {
         $group: {
@@ -75,7 +75,7 @@ const get = async (id, limit) => {
     ]),
     Recognition.aggregate([
       {
-        $match: { meeting: mongoose.Types.ObjectId(id) },
+        $match: { meetingId: mongoose.Types.ObjectId(id) },
       },
       {
         $group: {
@@ -163,7 +163,7 @@ const get = async (id, limit) => {
   }
 }
 
-const getById = async (id, userId, limit) => {
+const getById = async ({ id, userId, limit }) => {
   const [
     meeting,
     user,
@@ -171,14 +171,14 @@ const getById = async (id, userId, limit) => {
     recognitionsOverview,
     recognitionsSummary,
   ] = await Promise.all([
-    Meeting.findById(id).select('-users -recognitions').lean(),
-    User.findById(userId).select('-meetings -recognitions').lean(),
+    Meeting.findById(id).lean(),
+    User.findById(userId).lean(),
     limit
       ? Recognition.aggregate([
           {
             $match: {
-              meeting: mongoose.Types.ObjectId(id),
-              user: mongoose.Types.ObjectId(userId),
+              meetingId: mongoose.Types.ObjectId(id),
+              userId: mongoose.Types.ObjectId(userId),
             },
           },
           { $sort: { createdAt: -1 } },
@@ -186,14 +186,14 @@ const getById = async (id, userId, limit) => {
           { $sort: { createdAt: 1 } },
         ])
       : Recognition.find({
-          meeting: id,
-          user: userId,
+          meetingId: id,
+          userId,
         }).select('-meeting -user'),
     Recognition.aggregate([
       {
         $match: {
-          meeting: mongoose.Types.ObjectId(id),
-          user: mongoose.Types.ObjectId(userId),
+          meetingId: mongoose.Types.ObjectId(id),
+          userId: mongoose.Types.ObjectId(userId),
         },
       },
       {
@@ -224,8 +224,8 @@ const getById = async (id, userId, limit) => {
     Recognition.aggregate([
       {
         $match: {
-          meeting: mongoose.Types.ObjectId(id),
-          user: mongoose.Types.ObjectId(userId),
+          meetingId: mongoose.Types.ObjectId(id),
+          userId: mongoose.Types.ObjectId(userId),
         },
       },
       {
@@ -316,18 +316,16 @@ const getById = async (id, userId, limit) => {
   }
 }
 
-const getOverview = async (role, createdBy) => {
-  const getMeetingIds = async () => {
-    const currentMeeting = await Meeting.find({
-      ...(!role.includes('superadmin') && { createdBy }),
-    })
-      .select('_id')
-      .lean()
-    return currentMeeting.map(({ _id }) => _id)
-  }
+const getOverview = async ({ role, createdBy }) => {
   const data = await Recognition.aggregate([
     {
-      $match: { meeting: { $in: await getMeetingIds() } },
+      $match: {
+        meetingId: {
+          $in: await Meeting.find({
+            ...(!role.includes('superadmin') && { createdBy }),
+          }).distinct('_id'),
+        },
+      },
     },
     {
       $group: {
@@ -363,21 +361,19 @@ const getOverview = async (role, createdBy) => {
     'Disgusted',
     'Surprised',
   ]
-  return { labels, datas: Object.values(data[0] || {}) }
+  return data[0] ? { labels, datas: Object.values(data[0]) } : {}
 }
 
-const getSummary = async (role, createdBy) => {
-  const getMeetingIds = async () => {
-    const currentMeeting = await Meeting.find({
-      ...(!role.includes('superadmin') && { createdBy }),
-    })
-      .select('_id')
-      .lean()
-    return currentMeeting.map(({ _id }) => _id)
-  }
+const getSummary = async ({ role, createdBy }) => {
   const data = await Recognition.aggregate([
     {
-      $match: { meeting: { $in: await getMeetingIds() } },
+      $match: {
+        meetingId: {
+          $in: await Meeting.find({
+            ...(!role.includes('superadmin') && { createdBy }),
+          }).distinct('_id'),
+        },
+      },
     },
     {
       $group: {
@@ -429,53 +425,34 @@ const getSummary = async (role, createdBy) => {
     { $unset: ['_id', 'count'] },
   ])
   const labels = ['Positive', 'Negative']
-  return { labels, datas: Object.values(data[0] || {}) }
+  return data[0] ? { labels, datas: Object.values(data[0]) } : {}
 }
 
-const create = async (userId, meetingId, image, rest) => {
-  const [user, meeting] = await Promise.all([
-    User.findOne({ userId }),
-    Meeting.findOne({ meetingId }),
-  ])
+const create = async ({ userId, code, image, rest }) => {
+  const { _id: meetingId } = await Meeting.findOne({ code }).select('id')
   const { secure_url } = await cloudinary.uploader.upload(image)
   const recognition = new Recognition({
     ...rest,
     image: secure_url,
-    meeting: meeting.id,
-    user: user.id,
+    meetingId,
+    userId,
   })
   const data = await recognition.save()
-  await Promise.all([
-    User.findByIdAndUpdate(user.id, {
-      $push: {
-        recognitions: data.id,
-        ...(!user.meetings.includes(meeting.id) && {
-          meetings: meeting.id,
-        }),
-      },
-    }),
-    Meeting.findByIdAndUpdate(meeting.id, {
-      $push: {
-        recognitions: data.id,
-        ...(!meeting.users.includes(user.id) && { users: user.id }),
-      },
-    }),
-  ])
   if (!data) return
   const socket = io()
-  socket.emit('RECOGNITION_DATA_ADDED', { user: user.id, meeting: meeting.id })
+  socket.emit('RECOGNITION_DATA_ADDED', { userId, meetingId })
   return data
 }
 
-const update = async (id, isStart, meetingId) => {
+const update = async ({ id, isStart, code }) => {
   if (isStart) {
-    recognitionInterval[meetingId] = setInterval(() => {
+    recognitionInterval[code] = setInterval(() => {
       const socket = io()
-      socket.emit(meetingId, new Date())
+      socket.emit(code, new Date())
     }, 5000)
   } else {
-    clearInterval(recognitionInterval[meetingId])
-    delete recognitionInterval[meetingId]
+    clearInterval(recognitionInterval[code])
+    delete recognitionInterval[code]
   }
   const data = await Meeting.findByIdAndUpdate(
     id,
@@ -484,12 +461,12 @@ const update = async (id, isStart, meetingId) => {
       ...(isStart && { startedAt: new Date() }),
     },
     { new: true }
-  ).select('-recognitions -users')
+  )
   if (!data) return
   return data
 }
 
-const remove = async (id) => {
+const remove = async ({ id }) => {
   const data = await Recognition.findById(id)
   if (!data) return
   const public_id = data.image.substring(

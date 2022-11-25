@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const meetingSchema = new mongoose.Schema(
   {
-    meetingId: String,
+    code: String,
     description: String,
     isStart: { type: Boolean, default: false },
     startedAt: { type: Date, default: Date.now },
@@ -10,18 +10,6 @@ const meetingSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    users: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-      },
-    ],
-    recognitions: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Recognition',
-      },
-    ],
   },
   { timestamps: true }
 )

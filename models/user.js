@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema(
   {
     name: String,
     fullname: String,
-    userId: String,
+    authId: String,
     email: String,
     picture: String,
     role: {
@@ -12,18 +12,6 @@ const userSchema = new mongoose.Schema(
       enum: ['student', 'teacher', 'superadmin'],
       default: 'student',
     },
-    meetings: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Meeting',
-      },
-    ],
-    recognitions: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Recognition',
-      },
-    ],
   },
   { timestamps: true }
 )

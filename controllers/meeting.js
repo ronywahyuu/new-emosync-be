@@ -6,7 +6,7 @@ const get = async (req, res, next) => {
       'https://api-fer-graphql.fly.dev/role': role,
       'https://api-fer-graphql.fly.dev/id': createdBy,
     } = req.auth.payload
-    const data = await meeting.get(role, createdBy)
+    const data = await meeting.get({ role, createdBy })
     if (!data.length) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -19,7 +19,7 @@ const get = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    const data = await meeting.getById(req.params.id)
+    const data = await meeting.getById({ id: req.params.id })
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -36,7 +36,7 @@ const getCount = async (req, res, next) => {
       'https://api-fer-graphql.fly.dev/role': role,
       'https://api-fer-graphql.fly.dev/id': createdBy,
     } = req.auth.payload
-    const data = await meeting.getCount(role, createdBy)
+    const data = await meeting.getCount({ role, createdBy })
     if (data === undefined) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -50,7 +50,7 @@ const getCount = async (req, res, next) => {
 const create = async (req, res, next) => {
   try {
     const { 'https://api-fer-graphql.fly.dev/id': createdBy } = req.auth.payload
-    const data = await meeting.create(req.body, createdBy)
+    const data = await meeting.create({ body: req.body, createdBy })
     if (!data) {
       return res.status(404).send({ message: "Data can't be saved!" })
     }
@@ -63,7 +63,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const data = await meeting.update(req.params.id, req.body)
+    const data = await meeting.update({ id: req.params.id, body: req.body })
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -76,7 +76,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   try {
-    const data = await meeting.remove(req.params.id)
+    const data = await meeting.remove({ id: req.params.id })
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }

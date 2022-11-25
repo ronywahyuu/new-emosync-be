@@ -3,62 +3,46 @@ const Meeting = require('../models/meeting')
 const User = require('../models/user')
 const Recognition = require('../models/recognition')
 
-const get = async (createdBy, userRole, role, meetings, recognitions) => {
-  const getMeetingIds = async () => {
-    const currentMeeting = await Meeting.find({
-      ...(!userRole.includes('superadmin') && { createdBy }),
-    })
-      .select('_id')
-      .lean()
-    return currentMeeting.map(({ _id }) => _id)
-  }
+const get = async ({ role, meetingId }) => {
   return await User.find({
-    ...(!userRole.includes('superadmin') && {
-      meetings: { $in: await getMeetingIds() },
+    ...(meetingId && {
+      _id: {
+        $in: await Recognition.find({ meetingId }).distinct('userId'),
+      },
     }),
     ...(role && { role }),
-    ...(meetings && { meetings }),
-    ...(recognitions && { recognitions }),
-  })
-    .select('-meetings -recognitions')
-    .sort({ createdAt: 'desc' })
+  }).sort({ createdAt: 'desc' })
 }
 
-const getById = async (id) => {
-  return await User.findById(id).select('-meetings -recognitions')
+const getById = async ({ id }) => {
+  return await User.findById(id)
 }
 
-const getCount = async (userRole, createdBy, role) => {
-  const getMeetingIds = async () => {
-    const currentMeeting = await Meeting.find({
-      ...(!userRole.includes('superadmin') && { createdBy }),
-    })
-      .select('_id')
-      .lean()
-    return currentMeeting.map(({ _id }) => _id)
-  }
+const getCount = async ({ userRole, createdBy, role }) => {
   return await User.count({
-    ...(!userRole.includes('superadmin') && {
-      meetings: { $in: await getMeetingIds() },
-    }),
+    _id: {
+      $in: await Recognition.find({
+        meetingId: {
+          $in: await Meeting.find({
+            ...(!userRole.includes('superadmin') && { createdBy }),
+          }).distinct('_id'),
+        },
+      }).distinct('userId'),
+    },
     ...(role && { role }),
   })
 }
 
-const getOverview = async (id, role, createdBy) => {
-  const getMeetingIds = async () => {
-    const currentMeeting = await Meeting.find({
-      ...(!role.includes('superadmin') && { createdBy }),
-    })
-      .select('_id')
-      .lean()
-    return currentMeeting.map(({ _id }) => _id)
-  }
+const getOverview = async ({ id, role, createdBy }) => {
   const data = await Recognition.aggregate([
     {
       $match: {
-        user: mongoose.Types.ObjectId(id),
-        meeting: { $in: await getMeetingIds() },
+        userId: mongoose.Types.ObjectId(id),
+        meetingId: {
+          $in: await Meeting.find({
+            ...(!role.includes('superadmin') && { createdBy }),
+          }).distinct('_id'),
+        },
       },
     },
     {
@@ -95,23 +79,19 @@ const getOverview = async (id, role, createdBy) => {
     'Disgusted',
     'Surprised',
   ]
-  return { labels, datas: Object.values(data[0] || {}) }
+  return data[0] ? { labels, datas: Object.values(data[0]) } : {}
 }
 
-const getSummary = async (id, role, createdBy) => {
-  const getMeetingIds = async () => {
-    const currentMeeting = await Meeting.find({
-      ...(!role.includes('superadmin') && { createdBy }),
-    })
-      .select('_id')
-      .lean()
-    return currentMeeting.map(({ _id }) => _id)
-  }
+const getSummary = async ({ id, role, createdBy }) => {
   const data = await Recognition.aggregate([
     {
       $match: {
-        user: mongoose.Types.ObjectId(id),
-        meeting: { $in: await getMeetingIds() },
+        userId: mongoose.Types.ObjectId(id),
+        meetingId: {
+          $in: await Meeting.find({
+            ...(!role.includes('superadmin') && { createdBy }),
+          }).distinct('_id'),
+        },
       },
     },
     {
@@ -164,10 +144,10 @@ const getSummary = async (id, role, createdBy) => {
     { $unset: ['_id', 'count'] },
   ])
   const labels = ['Positive', 'Negative']
-  return { labels, datas: Object.values(data[0] || {}) }
+  return data[0] ? { labels, datas: Object.values(data[0]) } : {}
 }
 
-const create = async (body) => {
+const create = async ({ body }) => {
   const { email } = body
   const user = await User.findOne({ email })
   if (user) return user
@@ -179,16 +159,16 @@ const create = async (body) => {
   return data
 }
 
-const update = async (userId, body) => {
+const update = async ({ userId, body }) => {
   const data = await User.findByIdAndUpdate(userId, body, {
     upsert: true,
     new: true,
-  }).select('-meetings -recognitions')
+  })
   if (!data) return
   return data
 }
 
-const remove = async (id) => {
+const remove = async ({ id }) => {
   const data = await User.findById(id)
   if (!data) return
   return await data.remove()

@@ -10,11 +10,11 @@ const recognitionSchema = new mongoose.Schema({
   surprised: Number,
   predict: String,
   image: String,
-  meeting: {
+  meetingId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Meeting',
   },
-  user: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
