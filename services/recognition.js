@@ -428,19 +428,18 @@ const getSummary = async ({ role, createdBy }) => {
   return data[0] ? { labels, datas: Object.values(data[0]) } : {}
 }
 
-const create = async ({ userId, meetingId, image, rest }) => {
+const create = async ({ userId, image, rest }) => {
   const { secure_url } = await cloudinary.uploader.upload(image)
   const recognition = new Recognition({
     ...rest,
     image: secure_url,
-    meetingId,
     userId,
   })
   const data = await recognition.save()
   if (!data) return
   const socket = io()
   socket
-    .to([meetingId, `${meetingId}-${userId}`])
+    .to([rest.meetingId, `${rest.meetingId}-${userId}`])
     .emit('RECOGNITION_DATA_ADDED')
   return data
 }

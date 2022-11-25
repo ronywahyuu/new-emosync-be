@@ -70,8 +70,8 @@ const getSummary = async (req, res, next) => {
 const create = async (req, res, next) => {
   try {
     const { 'https://api-fer-graphql.fly.dev/id': userId } = req.auth.payload
-    const { meetingId, image, ...rest } = req.body
-    const data = await recognition.create({ userId, meetingId, image, rest })
+    const { image, ...rest } = req.body
+    const data = await recognition.create({ userId, image, rest })
     if (!data) {
       return res.status(404).send({ message: "Data can't be saved!" })
     }
