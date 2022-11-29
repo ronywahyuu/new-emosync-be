@@ -36,8 +36,8 @@ const getById = async (req, res, next) => {
 const getOverview = async (req, res, next) => {
   try {
     const {
-      'https://api-fer-graphql.fly.dev/role': role,
-      'https://api-fer-graphql.fly.dev/id': createdBy,
+      'https://customclaim.com/role': role,
+      'https://customclaim.com/id': createdBy,
     } = req.auth.payload
     const data = await recognition.getOverview({ role, createdBy })
     if (!data?.datas?.length) {
@@ -53,8 +53,8 @@ const getOverview = async (req, res, next) => {
 const getSummary = async (req, res, next) => {
   try {
     const {
-      'https://api-fer-graphql.fly.dev/role': role,
-      'https://api-fer-graphql.fly.dev/id': createdBy,
+      'https://customclaim.com/role': role,
+      'https://customclaim.com/id': createdBy,
     } = req.auth.payload
     const data = await recognition.getSummary({ role, createdBy })
     if (!data?.datas?.length) {
@@ -69,7 +69,7 @@ const getSummary = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const { 'https://api-fer-graphql.fly.dev/id': userId } = req.auth.payload
+    const { 'https://customclaim.com/id': userId } = req.auth.payload
     const { image, ...rest } = req.body
     const data = await recognition.create({ userId, image, rest })
     if (!data) {

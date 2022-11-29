@@ -3,8 +3,8 @@ const meeting = require('../services/meeting')
 const get = async (req, res, next) => {
   try {
     const {
-      'https://api-fer-graphql.fly.dev/role': role,
-      'https://api-fer-graphql.fly.dev/id': createdBy,
+      'https://customclaim.com/role': role,
+      'https://customclaim.com/id': createdBy,
     } = req.auth.payload
     const data = await meeting.get({ role, createdBy })
     if (!data.length) {
@@ -33,8 +33,8 @@ const getById = async (req, res, next) => {
 const getCount = async (req, res, next) => {
   try {
     const {
-      'https://api-fer-graphql.fly.dev/role': role,
-      'https://api-fer-graphql.fly.dev/id': createdBy,
+      'https://customclaim.com/role': role,
+      'https://customclaim.com/id': createdBy,
     } = req.auth.payload
     const data = await meeting.getCount({ role, createdBy })
     if (data === undefined) {
@@ -49,7 +49,7 @@ const getCount = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const { 'https://api-fer-graphql.fly.dev/id': createdBy } = req.auth.payload
+    const { 'https://customclaim.com/id': createdBy } = req.auth.payload
     const data = await meeting.create({ body: req.body, createdBy })
     if (!data) {
       return res.status(404).send({ message: "Data can't be saved!" })

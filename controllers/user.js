@@ -30,8 +30,8 @@ const getById = async (req, res, next) => {
 const getCount = async (req, res, next) => {
   try {
     const {
-      'https://api-fer-graphql.fly.dev/id': createdBy,
-      'https://api-fer-graphql.fly.dev/role': userRole,
+      'https://customclaim.com/id': createdBy,
+      'https://customclaim.com/role': userRole,
     } = req.auth.payload
     const { role } = req.query
     const data = await user.getCount({ userRole, createdBy, role })
@@ -48,8 +48,8 @@ const getCount = async (req, res, next) => {
 const getOverview = async (req, res, next) => {
   try {
     const {
-      'https://api-fer-graphql.fly.dev/role': role,
-      'https://api-fer-graphql.fly.dev/id': createdBy,
+      'https://customclaim.com/role': role,
+      'https://customclaim.com/id': createdBy,
     } = req.auth.payload
     const data = await user.getOverview({ id: req.params.id, role, createdBy })
     if (!data?.datas?.length) {
@@ -65,8 +65,8 @@ const getOverview = async (req, res, next) => {
 const getSummary = async (req, res, next) => {
   try {
     const {
-      'https://api-fer-graphql.fly.dev/role': role,
-      'https://api-fer-graphql.fly.dev/id': createdBy,
+      'https://customclaim.com/role': role,
+      'https://customclaim.com/id': createdBy,
     } = req.auth.payload
     const data = await user.getSummary({ id: req.params.id, role, createdBy })
     if (!data?.datas?.length) {
@@ -94,7 +94,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const { 'https://api-fer-graphql.fly.dev/id': userId } = req.auth.payload
+    const { 'https://customclaim.com/id': userId } = req.auth.payload
     const data = await user.update({ userId, body: req.body })
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
