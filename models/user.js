@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Meeting = require('./meeting')
+const Recognition = require('./recognition')
 
 const userSchema = new mongoose.Schema(
   {
@@ -21,8 +22,12 @@ userSchema.set('toJSON', {
   versionKey: false,
 })
 
-userSchema.pre('deleteMany', function () {
-  return Meeting.deleteMany({ createdBy: this._id })
+userSchema.pre('remove', async function () {
+  const meetingIds = await Meeting.find({ createdBy: this._id }).distinct('_id')
+  return Promise.all([
+    Recognition.deleteMany({ meetingId: { $in: meetingIds } }),
+    Meeting.deleteMany({ createdBy: this._id }),
+  ])
 })
 
 module.exports = mongoose.model('User', userSchema)
