@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Meeting = require('./meeting')
 
 const userSchema = new mongoose.Schema(
   {
@@ -18,6 +19,10 @@ const userSchema = new mongoose.Schema(
 
 userSchema.set('toJSON', {
   versionKey: false,
+})
+
+userSchema.pre('deleteMany', function () {
+  return Meeting.deleteMany({ createdBy: this._id })
 })
 
 module.exports = mongoose.model('User', userSchema)

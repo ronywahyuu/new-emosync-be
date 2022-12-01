@@ -20,15 +20,17 @@ const getById = async ({ id }) => {
 
 const getCount = async ({ userRole, createdBy, role }) => {
   return await User.count({
-    _id: {
-      $in: await Recognition.find({
-        meetingId: {
-          $in: await Meeting.find({
-            ...(!userRole.includes('superadmin') && { createdBy }),
-          }).distinct('_id'),
-        },
-      }).distinct('userId'),
-    },
+    ...(role !== 'teacher' && {
+      _id: {
+        $in: await Recognition.find({
+          meetingId: {
+            $in: await Meeting.find({
+              ...(!userRole.includes('superadmin') && { createdBy }),
+            }).distinct('_id'),
+          },
+        }).distinct('userId'),
+      },
+    }),
     ...(role && { role }),
   })
 }

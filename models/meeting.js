@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Recognition = require('./recognition')
 
 const meetingSchema = new mongoose.Schema(
   {
@@ -16,6 +17,10 @@ const meetingSchema = new mongoose.Schema(
 
 meetingSchema.set('toJSON', {
   versionKey: false,
+})
+
+meetingSchema.pre('remove', function () {
+  return Recognition.deleteMany({ meetingId: this._id })
 })
 
 module.exports = mongoose.model('Meeting', meetingSchema)
