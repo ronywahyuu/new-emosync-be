@@ -429,7 +429,9 @@ const getSummary = async ({ role, createdBy }) => {
 }
 
 const create = async ({ userId, image, rest }) => {
-  const { secure_url } = await cloudinary.uploader.upload(image)
+  const { secure_url } = await cloudinary.uploader.upload(image, {
+    folder: `${rest.meetingId}/${userId}`,
+  })
   const recognition = new Recognition({
     ...rest,
     image: secure_url,
@@ -475,8 +477,12 @@ const remove = async ({ id }) => {
     data.image.indexOf('.jpg') - 20,
     data.image.indexOf('.jpg')
   )
-  await cloudinary.uploader.destroy(public_id)
-  await data.remove()
+  await Promise.all([
+    cloudinary.uploader.destroy(
+      `${data.meetingId}/${data.userId}/${public_id}`
+    ),
+    data.remove(),
+  ])
   return data
 }
 
