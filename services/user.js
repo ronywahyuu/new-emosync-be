@@ -3,13 +3,25 @@ const Meeting = require('../models/meeting')
 const User = require('../models/user')
 const Recognition = require('../models/recognition')
 
-const get = async ({ role, meetingId }) => {
+const get = async ({ role, meetingId, createdBy, userRole }) => {
   return await User.find({
     ...(meetingId && {
       _id: {
         $in: await Recognition.find({ meetingId }).distinct('userId'),
       },
     }),
+    ...(!meetingId &&
+      role !== 'teacher' && {
+        _id: {
+          $in: await Recognition.find({
+            meetingId: {
+              $in: await Meeting.find({
+                ...(!userRole.includes('superadmin') && { createdBy }),
+              }).distinct('_id'),
+            },
+          }).distinct('userId'),
+        },
+      }),
     ...(role && { role }),
   }).sort({ createdAt: 'desc' })
 }

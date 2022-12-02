@@ -2,8 +2,12 @@ const user = require('../services/user')
 
 const get = async (req, res, next) => {
   try {
+    const {
+      'https://customclaim.com/id': createdBy,
+      'https://customclaim.com/role': userRole,
+    } = req.auth.payload
     const { role, meetingId } = req.query
-    const data = await user.get({ role, meetingId })
+    const data = await user.get({ role, meetingId, createdBy, userRole })
     if (!data.length) {
       return res.status(404).send({ message: 'Data not found!' })
     }
