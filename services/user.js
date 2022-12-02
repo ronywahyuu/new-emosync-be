@@ -11,6 +11,7 @@ const get = async ({ role, meetingId, createdBy, userRole }) => {
       },
     }),
     ...(!meetingId &&
+      role &&
       role !== 'teacher' && {
         _id: {
           $in: await Recognition.find({
