@@ -3,14 +3,28 @@ const Recognition = require('./recognition')
 
 const meetingSchema = new mongoose.Schema(
   {
-    code: String,
+    name: String,
+    subject: String,
     description: String,
+    link: String,
+    code: String,
+    createdBy: String,
     isStart: { type: Boolean, default: false },
     startedAt: { type: Date, default: Date.now },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+    isEnded: { type: Boolean, default: false },
+    endedAt: { type: Date, default: null },
+    configuration: {
+      size: String,
+      emotionDisplay: String,
     },
+    participants: [
+      {
+        _id: String,
+        userId: String,
+        fullname: String,
+        name: String,
+      },
+    ],
   },
   { timestamps: true }
 )

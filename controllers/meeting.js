@@ -74,6 +74,70 @@ const update = async (req, res, next) => {
   }
 }
 
+const addParticipant = async (req, res, next) => {
+  try {
+    const data = await meeting.addParticipant({
+      id: req.params.id,
+      body: req.body,
+    })
+    if (!data) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
+const setMeetingStatus = async (req, res, next) => {
+  try {
+    const data = await meeting.update({
+      id: req.params.id,
+      body: req.body,
+    })
+    if (!data) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
+const setStart = async (req, res, next) => {
+  try {
+    const data = await meeting.setStart({
+      body: req.body,
+      meetingId: req.params.id,
+    })
+    if (!data) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
+const setStop = async (req, res, next) => {
+  try {
+    const data = await meeting.setStop({
+      body: req.body,
+      meetingId: req.params.id,
+    })
+    if (!data) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
 const remove = async (req, res, next) => {
   try {
     const data = await meeting.remove({ id: req.params.id })
@@ -93,5 +157,9 @@ module.exports = {
   getCount,
   create,
   update,
+  addParticipant,
+  setMeetingStatus,
+  setStart,
+  setStop,
   remove,
 }

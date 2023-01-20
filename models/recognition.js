@@ -10,14 +10,8 @@ const recognitionSchema = new mongoose.Schema({
   surprised: Number,
   predict: String,
   image: String,
-  meetingId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Meeting',
-  },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
+  meetingId: String,
+  userId: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 })

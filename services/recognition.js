@@ -14,9 +14,9 @@ const get = async ({ id, limit }) => {
     recognitionsOverview,
     recognitionsSummary,
   ] = await Promise.all([
-    Meeting.findById(id).lean(),
+    Meeting.findOne({ code: id }),
     Recognition.aggregate([
-      { $match: { meetingId: mongoose.Types.ObjectId(id) } },
+      { $match: { meetingId: id } },
       {
         $group: {
           _id: { $toString: '$createdAt' },
@@ -46,7 +46,7 @@ const get = async ({ id, limit }) => {
     ]),
     Recognition.aggregate([
       {
-        $match: { meetingId: mongoose.Types.ObjectId(id) },
+        $match: { meetingId: id },
       },
       {
         $group: {
@@ -75,7 +75,7 @@ const get = async ({ id, limit }) => {
     ]),
     Recognition.aggregate([
       {
-        $match: { meetingId: mongoose.Types.ObjectId(id) },
+        $match: { meetingId: id },
       },
       {
         $group: {
@@ -139,26 +139,24 @@ const get = async ({ id, limit }) => {
   const labelsSummary = ['Positive', 'Negative']
   if (!meeting) return
   return {
-    meeting: {
-      ...meeting,
-      recognitionsOverview: {
-        labels: labelsOverview,
-        datas: Object.values(recognitionsOverview[0]),
-      },
-      recognitionsSummary: {
-        labels: labelsSummary,
-        datas: Object.values(recognitionsSummary[0]),
-      },
-      recognitionsDetail: {
-        labels: recognitionDetail.map(({ _id }) => _id),
-        neutral: recognitionDetail.map(({ neutral }) => neutral),
-        happy: recognitionDetail.map(({ happy }) => happy),
-        sad: recognitionDetail.map(({ sad }) => sad),
-        angry: recognitionDetail.map(({ angry }) => angry),
-        fearful: recognitionDetail.map(({ fearful }) => fearful),
-        disgusted: recognitionDetail.map(({ disgusted }) => disgusted),
-        surprised: recognitionDetail.map(({ surprised }) => surprised),
-      },
+    recognitionStream: [...recognitionDetail],
+    recognitionsOverview: {
+      labels: labelsOverview,
+      datas: Object.values(recognitionsOverview[0]),
+    },
+    recognitionsSummary: {
+      labels: labelsSummary,
+      datas: Object.values(recognitionsSummary[0]),
+    },
+    recognitionsDetail: {
+      labels: recognitionDetail.map(({ _id }) => _id),
+      neutral: recognitionDetail.map(({ neutral }) => neutral),
+      happy: recognitionDetail.map(({ happy }) => happy),
+      sad: recognitionDetail.map(({ sad }) => sad),
+      angry: recognitionDetail.map(({ angry }) => angry),
+      fearful: recognitionDetail.map(({ fearful }) => fearful),
+      disgusted: recognitionDetail.map(({ disgusted }) => disgusted),
+      surprised: recognitionDetail.map(({ surprised }) => surprised),
     },
   }
 }
@@ -166,19 +164,19 @@ const get = async ({ id, limit }) => {
 const getById = async ({ id, userId, limit }) => {
   const [
     meeting,
-    user,
+    // user,
     recognitionDetail,
     recognitionsOverview,
     recognitionsSummary,
   ] = await Promise.all([
     Meeting.findById(id).lean(),
-    User.findById(userId).lean(),
+    // User.findById(userId).lean(),
     limit
       ? Recognition.aggregate([
           {
             $match: {
-              meetingId: mongoose.Types.ObjectId(id),
-              userId: mongoose.Types.ObjectId(userId),
+              meetingId: id,
+              userId: userId,
             },
           },
           { $sort: { createdAt: -1 } },
@@ -192,8 +190,8 @@ const getById = async ({ id, userId, limit }) => {
     Recognition.aggregate([
       {
         $match: {
-          meetingId: mongoose.Types.ObjectId(id),
-          userId: mongoose.Types.ObjectId(userId),
+          meetingId: id,
+          userId: userId,
         },
       },
       {
@@ -224,8 +222,8 @@ const getById = async ({ id, userId, limit }) => {
     Recognition.aggregate([
       {
         $match: {
-          meetingId: mongoose.Types.ObjectId(id),
-          userId: mongoose.Types.ObjectId(userId),
+          meetingId: id,
+          userId: userId,
         },
       },
       {
@@ -288,30 +286,27 @@ const getById = async ({ id, userId, limit }) => {
     'Surprised',
   ]
   const labelsSummary = ['Positive', 'Negative']
-  if (!meeting || !user) return
+  if (!meeting) return
   return {
-    user,
-    meeting: {
-      ...meeting,
-      recognitionsOverview: {
-        labels: labelsOverview,
-        datas: Object.values(recognitionsOverview[0]),
-      },
-      recognitionsSummary: {
-        labels: labelsSummary,
-        datas: Object.values(recognitionsSummary[0]),
-      },
-      recognitionsDetail: {
-        labels: recognitionDetail.map(({ createdAt }) => createdAt),
-        neutral: recognitionDetail.map(({ neutral }) => neutral),
-        happy: recognitionDetail.map(({ happy }) => happy),
-        sad: recognitionDetail.map(({ sad }) => sad),
-        angry: recognitionDetail.map(({ angry }) => angry),
-        fearful: recognitionDetail.map(({ fearful }) => fearful),
-        disgusted: recognitionDetail.map(({ disgusted }) => disgusted),
-        surprised: recognitionDetail.map(({ surprised }) => surprised),
-        image: recognitionDetail.map(({ image }) => image),
-      },
+    recognitionStream: [...recognitionDetail],
+    recognitionsOverview: {
+      labels: labelsOverview,
+      datas: Object.values(recognitionsOverview[0]),
+    },
+    recognitionsSummary: {
+      labels: labelsSummary,
+      datas: Object.values(recognitionsSummary[0]),
+    },
+    recognitionsDetail: {
+      labels: recognitionDetail.map(({ createdAt }) => createdAt),
+      neutral: recognitionDetail.map(({ neutral }) => neutral),
+      happy: recognitionDetail.map(({ happy }) => happy),
+      sad: recognitionDetail.map(({ sad }) => sad),
+      angry: recognitionDetail.map(({ angry }) => angry),
+      fearful: recognitionDetail.map(({ fearful }) => fearful),
+      disgusted: recognitionDetail.map(({ disgusted }) => disgusted),
+      surprised: recognitionDetail.map(({ surprised }) => surprised),
+      image: recognitionDetail.map(({ image }) => image),
     },
   }
 }
