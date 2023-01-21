@@ -1,4 +1,5 @@
 const Meeting = require('../models/meeting')
+const io = require('../utils/socketio')
 
 let recognitionInterval = {}
 

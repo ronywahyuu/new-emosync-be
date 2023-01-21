@@ -169,7 +169,7 @@ const getById = async ({ id, userId, limit }) => {
     recognitionsOverview,
     recognitionsSummary,
   ] = await Promise.all([
-    Meeting.findById(id).lean(),
+    Meeting.findOne({ code: id }),
     // User.findById(userId).lean(),
     limit
       ? Recognition.aggregate([
@@ -185,7 +185,7 @@ const getById = async ({ id, userId, limit }) => {
         ])
       : Recognition.find({
           meetingId: id,
-          userId,
+          userId: userId,
         }).select('-meeting -user'),
     Recognition.aggregate([
       {
@@ -436,8 +436,10 @@ const create = async ({ userId, image, rest }) => {
   if (!data) return
   const socket = io()
   socket
-    .to([rest.meetingId, `${rest.meetingId}-${userId}`])
+    .to(rest.meetingId)
+    .to(`${rest.meetingId}-${userId}`)
     .emit('RECOGNITION_DATA_ADDED')
+
   return data
 }
 
