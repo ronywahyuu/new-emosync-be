@@ -13,12 +13,12 @@ const get = async ({ role, meetingId, createdBy, userRole }) => {
     ...(!meetingId &&
       role &&
       role !== 'teacher' && {
-        _id: {
+        userId: {
           $in: await Recognition.find({
             meetingId: {
               $in: await Meeting.find({
                 ...(!userRole.includes('superadmin') && { createdBy }),
-              }).distinct('_id'),
+              }).distinct('code'),
             },
           }).distinct('userId'),
         },
@@ -39,7 +39,7 @@ const getCount = async ({ userRole, createdBy, role }) => {
           meetingId: {
             $in: await Meeting.find({
               ...(!userRole.includes('superadmin') && { createdBy }),
-            }).distinct('_id'),
+            }).distinct('code'),
           },
         }).distinct('userId'),
       },
@@ -52,11 +52,11 @@ const getOverview = async ({ id, role, createdBy }) => {
   const data = await Recognition.aggregate([
     {
       $match: {
-        userId: mongoose.Types.ObjectId(id),
+        userId: id,
         meetingId: {
           $in: await Meeting.find({
             ...(!role.includes('superadmin') && { createdBy }),
-          }).distinct('_id'),
+          }).distinct('code'),
         },
       },
     },
@@ -101,11 +101,11 @@ const getSummary = async ({ id, role, createdBy }) => {
   const data = await Recognition.aggregate([
     {
       $match: {
-        userId: mongoose.Types.ObjectId(id),
+        userId: id,
         meetingId: {
           $in: await Meeting.find({
             ...(!role.includes('superadmin') && { createdBy }),
-          }).distinct('_id'),
+          }).distinct('code'),
         },
       },
     },
