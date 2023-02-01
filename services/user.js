@@ -6,7 +6,7 @@ const Recognition = require('../models/recognition')
 const get = async ({ role, meetingId, createdBy, userRole }) => {
   return await User.find({
     ...(meetingId && {
-      _id: {
+      userId: {
         $in: await Recognition.find({ meetingId }).distinct('userId'),
       },
     }),
