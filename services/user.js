@@ -31,6 +31,10 @@ const getById = async ({ id }) => {
   return await User.findById(id)
 }
 
+const getByUserId = async ({ userId }) => {
+  return await User.find({ userId: userId })
+}
+
 const getCount = async ({ userRole, createdBy, role }) => {
   return await User.count({
     ...(role !== 'teacher' && {
@@ -192,6 +196,7 @@ const remove = async ({ id }) => {
 module.exports = {
   get,
   getById,
+  getByUserId,
   getCount,
   getOverview,
   getSummary,
