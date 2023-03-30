@@ -11,7 +11,12 @@ const create = async ({ body, createdBy }) => {
     return await data.save()
 }
 
+const update = async ({ id, body }) => {
+    return await Class.findOneAndUpdate({ meetCode: id }, body, {upsert: true, new: true})
+}
+
 module.exports = {
     get,
-    create
+    create,
+    update,
 }
