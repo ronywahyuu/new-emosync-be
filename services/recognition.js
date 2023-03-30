@@ -7,16 +7,17 @@ const io = require('../utils/socketio')
 
 let recognitionInterval = {}
 
-const get = async ({ id, limit }) => {
+// get from 1 meeting instance
+const get = async ({ emoviewCode, limit }) => {
   const [
     meeting,
     recognitionDetail,
     recognitionsOverview,
     recognitionsSummary,
   ] = await Promise.all([
-    Meeting.findOne({ code: id }),
+    Meeting.findOne({ emoviewCode: emoviewCode }),
     Recognition.aggregate([
-      { $match: { meetingId: id } },
+      { $match: { emoviewCode: emoviewCode } },
       {
         $group: {
           _id: { $toString: '$createdAt' },
@@ -46,7 +47,7 @@ const get = async ({ id, limit }) => {
     ]),
     Recognition.aggregate([
       {
-        $match: { meetingId: id },
+        $match: { emoviewCode: emoviewCode },
       },
       {
         $group: {
@@ -75,7 +76,7 @@ const get = async ({ id, limit }) => {
     ]),
     Recognition.aggregate([
       {
-        $match: { meetingId: id },
+        $match: { emoviewCode: emoviewCode },
       },
       {
         $group: {
@@ -161,21 +162,173 @@ const get = async ({ id, limit }) => {
   }
 }
 
-const getById = async ({ id, userId, limit }) => {
+const getFromAllInstance = async ({ meetCode, limit }) => {
   const [
     meeting,
-    // user,
     recognitionDetail,
     recognitionsOverview,
     recognitionsSummary,
   ] = await Promise.all([
-    Meeting.findOne({ code: id }),
-    // User.findById(userId).lean(),
+    Meeting.find({ meetCode: meetCode }),
+    Recognition.aggregate([
+      { $match: { meetCode: meetCode } },
+      {
+        $group: {
+          _id: { $toString: '$createdAt' },
+          neutral: { $avg: '$neutral' },
+          happy: { $avg: '$happy' },
+          sad: { $avg: '$sad' },
+          angry: { $avg: '$angry' },
+          fearful: { $avg: '$fearful' },
+          disgusted: { $avg: '$disgusted' },
+          surprised: { $avg: '$surprised' },
+        },
+      },
+      {
+        $project: {
+          neutral: { $round: ['$neutral', 2] },
+          happy: { $round: ['$happy', 2] },
+          sad: { $round: ['$sad', 2] },
+          angry: { $round: ['$angry', 2] },
+          fearful: { $round: ['$fearful', 2] },
+          disgusted: { $round: ['$disgusted', 2] },
+          surprised: { $round: ['$surprised', 2] },
+        },
+      },
+      { $sort: { _id: -1 } },
+      ...(limit ? [{ $limit: parseInt(limit, 10) }] : []),
+      { $sort: { _id: 1 } },
+    ]),
+    Recognition.aggregate([
+      {
+        $match: { meetCode: meetCode },
+      },
+      {
+        $group: {
+          _id: null,
+          neutral: { $avg: '$neutral' },
+          happy: { $avg: '$happy' },
+          sad: { $avg: '$sad' },
+          angry: { $avg: '$angry' },
+          fearful: { $avg: '$fearful' },
+          disgusted: { $avg: '$disgusted' },
+          surprised: { $avg: '$surprised' },
+        },
+      },
+      {
+        $project: {
+          neutral: { $round: { $multiply: ['$neutral', 100] } },
+          happy: { $round: { $multiply: ['$happy', 100] } },
+          sad: { $round: { $multiply: ['$sad', 100] } },
+          angry: { $round: { $multiply: ['$angry', 100] } },
+          fearful: { $round: { $multiply: ['$fearful', 100] } },
+          disgusted: { $round: { $multiply: ['$disgusted', 100] } },
+          surprised: { $round: { $multiply: ['$surprised', 100] } },
+        },
+      },
+      { $unset: ['_id'] },
+    ]),
+    Recognition.aggregate([
+      {
+        $match: { meetCode: meetCode },
+      },
+      {
+        $group: {
+          _id: null,
+          positive: { $sum: { $add: ['$happy', '$surprised'] } },
+          negative: {
+            $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] },
+          },
+          count: {
+            $sum: {
+              $add: [
+                '$happy',
+                '$sad',
+                '$angry',
+                '$fearful',
+                '$disgusted',
+                '$surprised',
+              ],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          positive: {
+            $cond: [
+              { $eq: ['$count', 0] },
+              0,
+              {
+                $round: {
+                  $multiply: [{ $divide: ['$positive', '$count'] }, 100],
+                },
+              },
+            ],
+          },
+          negative: {
+            $cond: [
+              { $eq: ['$count', 0] },
+              0,
+              {
+                $round: {
+                  $multiply: [{ $divide: ['$negative', '$count'] }, 100],
+                },
+              },
+            ],
+          },
+        },
+      },
+      { $unset: ['_id', 'count'] },
+    ]),
+  ])
+  const labelsOverview = [
+    'Neutral',
+    'Happy',
+    'Sad',
+    'Angry',
+    'Fearful',
+    'Disgusted',
+    'Surprised',
+  ]
+  const labelsSummary = ['Positive', 'Negative']
+  if (!meeting) return
+  return {
+    recognitionStream: [...recognitionDetail],
+    recognitionsOverview: {
+      labels: labelsOverview,
+      datas: Object.values(recognitionsOverview[0]),
+    },
+    recognitionsSummary: {
+      labels: labelsSummary,
+      datas: Object.values(recognitionsSummary[0]),
+    },
+    recognitionsDetail: {
+      labels: recognitionDetail.map(({ _id }) => _id),
+      neutral: recognitionDetail.map(({ neutral }) => neutral),
+      happy: recognitionDetail.map(({ happy }) => happy),
+      sad: recognitionDetail.map(({ sad }) => sad),
+      angry: recognitionDetail.map(({ angry }) => angry),
+      fearful: recognitionDetail.map(({ fearful }) => fearful),
+      disgusted: recognitionDetail.map(({ disgusted }) => disgusted),
+      surprised: recognitionDetail.map(({ surprised }) => surprised),
+    },
+  }
+}
+
+const getById = async ({ emoviewCode, userId, limit }) => {
+  const [
+    meeting,
+    recognitionDetail,
+    recognitionsOverview,
+    recognitionsSummary,
+  ] = await Promise.all([
+    Meeting.findOne({ emoviewCode: emoviewCode }),
     limit
       ? Recognition.aggregate([
           {
             $match: {
-              meetingId: id,
+              emoviewCode: emoviewCode,
               userId: userId,
             },
           },
@@ -184,13 +337,13 @@ const getById = async ({ id, userId, limit }) => {
           { $sort: { createdAt: 1 } },
         ])
       : Recognition.find({
-          meetingId: id,
+          meetingId: emoviewCode,
           userId: userId,
         }).select('-meeting -user'),
     Recognition.aggregate([
       {
         $match: {
-          meetingId: id,
+          emoviewCode: emoviewCode,
           userId: userId,
         },
       },
@@ -222,7 +375,7 @@ const getById = async ({ id, userId, limit }) => {
     Recognition.aggregate([
       {
         $match: {
-          meetingId: id,
+          emoviewCode: emoviewCode,
           userId: userId,
         },
       },
@@ -315,10 +468,10 @@ const getOverview = async ({ role, createdBy }) => {
   const data = await Recognition.aggregate([
     {
       $match: {
-        meetingId: {
+        emoviewCode: {
           $in: await Meeting.find({
             ...(!role.includes('superadmin') && { createdBy }),
-          }).distinct('_id'),
+          }).distinct('emoviewCode'),
         },
       },
     },
@@ -345,7 +498,7 @@ const getOverview = async ({ role, createdBy }) => {
         surprised: { $round: { $multiply: ['$surprised', 100] } },
       },
     },
-    { $unset: ['_id'] },
+    { $unset: ['emoviewCode'] },
   ])
   const labels = [
     'Neutral',
@@ -363,10 +516,10 @@ const getSummary = async ({ role, createdBy }) => {
   const data = await Recognition.aggregate([
     {
       $match: {
-        meetingId: {
+        emoviewCode: {
           $in: await Meeting.find({
             ...(!role.includes('superadmin') && { createdBy }),
-          }).distinct('_id'),
+          }).distinct('emoviewCode'),
         },
       },
     },
@@ -417,7 +570,7 @@ const getSummary = async ({ role, createdBy }) => {
         },
       },
     },
-    { $unset: ['_id', 'count'] },
+    { $unset: ['emoviewCode', 'count'] },
   ])
   const labels = ['Positive', 'Negative']
   return data[0] ? { labels, datas: Object.values(data[0]) } : {}
@@ -425,7 +578,7 @@ const getSummary = async ({ role, createdBy }) => {
 
 const create = async ({ userId, image, rest }) => {
   const { secure_url } = await cloudinary.uploader.upload(image, {
-    folder: `${rest.meetingId}/${userId}`,
+    folder: `${rest.emoviewCode}/${userId}`,
   })
   const recognition = new Recognition({
     ...rest,
@@ -436,8 +589,8 @@ const create = async ({ userId, image, rest }) => {
   if (!data) return
   const socket = io()
   socket
-    .to(rest.meetingId)
-    .to(`${rest.meetingId}-${userId}`)
+    .to(rest.emoviewCode)
+    .to(`${rest.emoviewCode}-${userId}`)
     .emit('RECOGNITION_DATA_ADDED')
 
   return data
@@ -486,6 +639,7 @@ const remove = async ({ id }) => {
 module.exports = {
   get,
   getById,
+  getFromAllInstance,
   getOverview,
   getSummary,
   create,

@@ -3,7 +3,7 @@ const recognition = require('../services/recognition')
 const get = async (req, res, next) => {
   try {
     const data = await recognition.get({
-      id: req.params.id,
+      emoviewCode: req.params.id,
       limit: req.query.limit,
     })
     if (!data) {
@@ -19,7 +19,7 @@ const get = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const data = await recognition.getById({
-      id: req.params.id,
+      emoviewCode: req.params.id,
       userId: req.params.userId,
       limit: req.query.limit,
     })
