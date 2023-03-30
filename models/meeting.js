@@ -32,7 +32,7 @@ meetingSchema.set('toJSON', {
 })
 
 meetingSchema.pre('remove', function () {
-  return Recognition.deleteMany({ meetingId: this._id })
+  return Recognition.deleteMany({ emoviewCode: this.emoviewCode })
 })
 
 module.exports = mongoose.model('Meeting', meetingSchema)

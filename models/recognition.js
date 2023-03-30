@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const recognitionSchema = new mongoose.Schema({
   meetCode: String,
-  emoviewId: String,
+  emoviewCode: String,
   userId: String,
   neutral: Number,
   happy: Number,
