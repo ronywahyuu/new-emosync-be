@@ -7,6 +7,7 @@ const classSchema = new mongoose.Schema(
     description: String,
     link: String,
     createdBy: String,
+    countOfMeetings: { type: Number, default: 0 },
     startedAt: { type: Date, default: null },
     endedAt: { type: Date, default: null },
   },

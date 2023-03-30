@@ -1,4 +1,5 @@
 const Meeting = require('../models/meeting')
+const Class = require('../models/class')
 const io = require('../utils/socketio')
 
 let recognitionInterval = {}
@@ -31,7 +32,11 @@ const getCountMeetInstance = async ({ meetCode }) => {
 
 const create = async ({ body, createdBy }) => {
   const data = new Meeting({ ...body, createdBy })
-  return await data.save()
+  await data.save();
+  let count = await Class.findOne({ meetCode: body.meetCode }).countOfMeetings;
+  count += 1;
+  await Class.updateOne({ meetCode: body.meetCode }, { countOfMeetings: count }).exec();
+  return data;
 }
 
 const update = async ({ id, body }) => {
