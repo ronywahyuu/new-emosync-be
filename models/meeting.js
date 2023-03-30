@@ -11,7 +11,7 @@ const meetingSchema = new mongoose.Schema(
     link: String,
     createdBy: String,
     isStart: { type: Boolean, default: false },
-    startedAt: { type: Date, default: Date.now },
+    startedAt: { type: Date, default: null },
     isEnded: { type: Boolean, default: false },
     endedAt: { type: Date, default: null },
     participants: [
