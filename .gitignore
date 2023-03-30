@@ -105,3 +105,6 @@ dist
 
 # Fly.io
 fly.toml
+
+# IDE
+.idea
