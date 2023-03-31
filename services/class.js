@@ -1,4 +1,5 @@
-const Class = require('../models/class');
+const Class = require('../models/class')
+const Meeting = require('../models/meeting')
 
 const get = async ({ role, createdBy }) => {
     if (role.includes('superadmin')) {
@@ -16,8 +17,16 @@ const update = async ({ id, body }) => {
     return await Class.findOneAndUpdate({ meetCode: id }, body, {upsert: true, new: true})
 }
 
+const remove = async ({ id }) => {
+  const data = await Class.findOne({ meetCode: id })
+  if (!data) return
+  await Meeting.findByIdAndDelete({ meetCode: id });
+  return await data.remove()
+}
+
 module.exports = {
     get,
     create,
     update,
+    remove,
 }
