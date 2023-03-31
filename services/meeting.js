@@ -1,5 +1,5 @@
 const Meeting = require('../models/meeting')
-const Class = require('../models/class')
+// const Class = require('../models/class')
 const io = require('../utils/socketio')
 
 let recognitionInterval = {}
@@ -31,11 +31,13 @@ const getCountMeetInstance = async ({ meetCode }) => {
 };
 
 const create = async ({ body, createdBy }) => {
-  const data = new Meeting({ ...body, createdBy })
+  const timestamp = new Date(Date.now()).toISOString();
+  const emoviewCode = timestamp.replace(/[-:]/g, '').replace('.', '').replace('T', '').replace('Z', '')
+  const data = new Meeting({ ...body, emoviewCode, createdBy })
   await data.save();
-  let count = await Class.findOne({ meetCode: body.meetCode }).countOfMeetings;
-  count += 1;
-  await Class.updateOne({ meetCode: body.meetCode }, { countOfMeetings: count }).exec();
+  // let count = await Class.findOne({ meetCode: body.meetCode });
+  // count.countOfMeetings += 1;
+  // await Class.updateOne({ meetCode: body.meetCode }, { countOfMeetings: count }).exec();
   return data;
 }
 
