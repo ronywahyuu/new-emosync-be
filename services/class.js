@@ -1,9 +1,10 @@
 const Class = require('../models/class');
 
 const get = async ({ role, createdBy }) => {
-    return await Class.find(
-        role.includes('superadmin') ? {} : { createdBy }
-      ).sort({ createdAt: 'desc' })
+    if (role.includes('superadmin')) {
+        return await Class.find({}).sort({ createdAt: 'desc' })
+    }
+    return await Class.find({ createdBy: createdBy }).sort({ createdAt: 'desc' })
 };
 
 const create = async ({ body, createdBy }) => {
