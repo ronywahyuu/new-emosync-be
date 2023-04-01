@@ -1,13 +1,13 @@
 const Meeting = require('../models/meeting')
-// const Class = require('../models/class')
+const Class = require('../models/class')
 const io = require('../utils/socketio')
 
 let recognitionInterval = {}
 
 const get = async ({ role, createdBy }) => {
-  return await Meeting.find(
-    role.includes('superadmin') ? {} : { createdBy }
-  ).sort({ createdAt: 'desc' })
+  return Meeting.find(
+      role.includes('superadmin') ? {} : {createdBy}
+  ).sort({createdAt: 'desc'});
 }
 
 const getById = async ({ id }) => {
@@ -19,7 +19,7 @@ const getByEmoviewCode = async ({ emoviewCode }) => {
 }
 
 const getByMeetCode = async ({ meetCode }) => {
-  return await Meeting.find({meetCode: meetCode});
+  return await Meeting.find({meetCode: meetCode}).sort({ createdAt: 'desc' });
 };
 
 const getCount = async ({ role, createdBy }) => {
@@ -33,7 +33,8 @@ const getCountMeetInstance = async ({ meetCode }) => {
 const create = async ({ body, createdBy }) => {
   const timestamp = new Date(Date.now()).toISOString();
   const emoviewCode = timestamp.replace(/[-:]/g, '').replace('.', '').replace('T', '').replace('Z', '')
-  const data = new Meeting({ ...body, emoviewCode, createdBy })
+  const data = new Meeting({ ...body, emoviewCode, createdBy });
+  await Class.updateOne({meetCode: body.meetCode}, { countOfMeetings: body.countOfMeetings}).exec();
   await data.save();
   // let count = await Class.findOne({ meetCode: body.meetCode });
   // count.countOfMeetings += 1;
@@ -41,8 +42,8 @@ const create = async ({ body, createdBy }) => {
   return data;
 }
 
-const update = async ({ id, body }) => {
-  return await Meeting.findByIdAndUpdate(id, body, {
+const update = async ({ emoviewCode, body }) => {
+  return await Meeting.findOneAndUpdate({emoviewCode: emoviewCode}, {...body}, {
     upsert: true,
     new: true,
   })
@@ -82,8 +83,8 @@ const setStop = async ({ emoviewCode }) => {
   return data
 }
 
-const remove = async ({ id }) => {
-  const data = await Meeting.findById(id)
+const remove = async ({ emoviewCode }) => {
+  const data = await Meeting.findOneAndDelete({emoviewCode: emoviewCode})
   if (!data) return
   return await data.remove()
 }

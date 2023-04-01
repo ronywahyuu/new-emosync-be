@@ -17,6 +17,23 @@ const get = async (req, res, next) => {
   }
 }
 
+const getByMeetCode = async (req, res, next) => {
+  try {
+    const {
+      'https://customclaim.com/id': createdBy,
+    } = req.auth.payload
+    const meetCode = req.params.meetCode
+    const data = await _class.getByMeetCode({ createdBy, meetCode })
+    if (!data.length) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
 const create = async (req, res, next) => {
   try {
     const { 'https://customclaim.com/id': createdBy } = req.auth.payload
@@ -59,6 +76,7 @@ const remove = async (req, res, next) => {
 
 module.exports = {
   get,
+  getByMeetCode,
   create,
   update,
   remove,

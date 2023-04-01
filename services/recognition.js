@@ -596,9 +596,9 @@ const create = async ({ userId, image, rest }) => {
   return data
 }
 
-const update = async ({ id, isStart, code }) => {
-  const data = await Meeting.findByIdAndUpdate(
-    id,
+const update = async ({ emoviewCode, isStart, code }) => {
+  const data = await Meeting.findOneAndUpdate(
+      {emoviewCode: emoviewCode},
     {
       isStart,
       ...(isStart && { startedAt: new Date() }),
@@ -610,7 +610,7 @@ const update = async ({ id, isStart, code }) => {
       const socket = io()
       socket
         .to(`student-${code}`)
-        .emit('SEND_RECOGNITION_DATA', { meetingId: id, datetime: new Date() })
+        .emit('SEND_RECOGNITION_DATA', { emoviewCode: emoviewCode, datetime: new Date() })
     }, 5000)
   } else {
     clearInterval(recognitionInterval[code])
@@ -620,8 +620,8 @@ const update = async ({ id, isStart, code }) => {
   return data
 }
 
-const remove = async ({ id }) => {
-  const data = await Recognition.findById(id)
+const remove = async ({ emoviewCode}) => {
+  const data = await Recognition.findOne({emoviewCode: emoviewCode})
   if (!data) return
   const public_id = data.image.substring(
     data.image.indexOf('.jpg') - 20,

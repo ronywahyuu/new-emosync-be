@@ -17,9 +17,22 @@ const get = async (req, res, next) => {
   }
 }
 
-const getById = async (req, res, next) => {
+const getByMeetCode = async (req, res, next) => {
   try {
-    const data = await meeting.getById({ id: req.params.id })
+    const data = await meeting.getByMeetCode({ meetCode: req.params.meetCode })
+    if (!data) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
+const getByEmoviewCode = async (req, res, next) => {
+  try {
+    const data = await meeting.getByEmoviewCode({ emoviewCode: req.params.emoviewCode })
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -63,7 +76,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const data = await meeting.update({ id: req.params.id, body: req.body })
+    const data = await meeting.update({ emoviewCode: req.params.emoviewCode, body: req.body })
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -77,7 +90,7 @@ const update = async (req, res, next) => {
 const addParticipant = async (req, res, next) => {
   try {
     const data = await meeting.addParticipant({
-      id: req.params.id,
+      emoviewCode: req.params.emoviewCode,
       body: req.body,
     })
     if (!data) {
@@ -90,27 +103,27 @@ const addParticipant = async (req, res, next) => {
   }
 }
 
-const setMeetingStatus = async (req, res, next) => {
-  try {
-    const data = await meeting.update({
-      id: req.params.id,
-      body: req.body,
-    })
-    if (!data) {
-      return res.status(404).send({ message: 'Data not found!' })
-    }
-    return res.status(200).send({ data })
-  } catch (error) {
-    console.log(error)
-    next(error)
-  }
-}
+// const setMeetingStatus = async (req, res, next) => {
+//   try {
+//     const data = await meeting.update({
+//       emoviewCode: req.params.id,
+//       body: req.body,
+//     })
+//     if (!data) {
+//       return res.status(404).send({ message: 'Data not found!' })
+//     }
+//     return res.status(200).send({ data })
+//   } catch (error) {
+//     console.log(error)
+//     next(error)
+//   }
+// }
 
 const setStart = async (req, res, next) => {
   try {
     const data = await meeting.setStart({
+      emoviewCode: req.params.emoviewCode,
       body: req.body,
-      meetingId: req.params.id,
     })
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
@@ -126,7 +139,7 @@ const setStop = async (req, res, next) => {
   try {
     const data = await meeting.setStop({
       body: req.body,
-      meetingId: req.params.id,
+      emoviewCode: req.params.emoviewCode,
     })
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
@@ -140,7 +153,7 @@ const setStop = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   try {
-    const data = await meeting.remove({ id: req.params.id })
+    const data = await meeting.remove({ emoviewCode: req.params.emoviewCode })
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -153,12 +166,14 @@ const remove = async (req, res, next) => {
 
 module.exports = {
   get,
-  getById,
+  // getById,
+  getByMeetCode,
+  getByEmoviewCode,
   getCount,
   create,
   update,
   addParticipant,
-  setMeetingStatus,
+  // setMeetingStatus,
   setStart,
   setStop,
   remove,

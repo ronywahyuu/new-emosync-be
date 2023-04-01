@@ -4,10 +4,10 @@ const recognition = require('../controllers/recognition')
 
 router.get('/overview', auth, recognition.getOverview)
 router.get('/summary', auth, recognition.getSummary)
-router.get('/:id', auth, recognition.get)
-router.get('/:id/:userId', auth, recognition.getById)
+router.get('/:emoviewCode', auth, recognition.get)
+router.get('/:emoviewCode/:userId', auth, recognition.getById)
 router.post('/', auth, recognition.create)
-router.put('/:id', auth, recognition.update)
-router.delete('/:id', auth, recognition.remove)
+router.put('/:emoviewCode', auth, recognition.update)
+router.delete('/:emoviewCode', auth, recognition.remove)
 
 module.exports = router
