@@ -67,6 +67,22 @@ const getSummary = async (req, res, next) => {
   }
 }
 
+const getArchive = async (req, res, next) => {
+  try {
+    const { ids } = req.body
+    const data = await recognition.getArchive({
+      emoviewCode: ids,
+    })
+    if (!data) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
 const create = async (req, res, next) => {
   try {
     const { 'https://customclaim.com/id': userId } = req.auth.payload
@@ -117,6 +133,7 @@ module.exports = {
   getById,
   getOverview,
   getSummary,
+  getArchive,
   create,
   update,
   remove,

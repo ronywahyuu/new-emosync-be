@@ -576,6 +576,151 @@ const getSummary = async ({ role, createdBy }) => {
   return data[0] ? { labels, datas: Object.values(data[0]) } : {}
 }
 
+const getArchive = async ({ limit, emoviewCode }) => {
+  const [recognitionDetail, recognitionsOverview, recognitionsSummary] = await Promise.all([
+    Recognition.aggregate([
+      { $match: { emoviewCode: { $in: [...emoviewCode] } } },
+      {
+        $project: {
+          _id: 0,
+          createdAt: 1,
+          meetCode: 1,
+          emoviewCode: 1,
+          userId: 1,
+          neutral: { $round: ['$neutral', 2] },
+          happy: { $round: ['$happy', 2] },
+          sad: { $round: ['$sad', 2] },
+          angry: { $round: ['$angry', 2] },
+          fearful: { $round: ['$fearful', 2] },
+          disgusted: { $round: ['$disgusted', 2] },
+          surprised: { $round: ['$surprised', 2] },
+          image: 1,
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      ...(limit ? [{ $limit: parseInt(limit, 10) }] : []),
+      { $sort: { createdAt: 1 } },
+    ]),
+    Recognition.aggregate([
+      {
+        $match: { emoviewCode: { $in: [...emoviewCode] } },
+      },
+      {
+        $group: {
+          _id: null,
+          neutral: { $avg: '$neutral' },
+          happy: { $avg: '$happy' },
+          sad: { $avg: '$sad' },
+          angry: { $avg: '$angry' },
+          fearful: { $avg: '$fearful' },
+          disgusted: { $avg: '$disgusted' },
+          surprised: { $avg: '$surprised' },
+        },
+      },
+      {
+        $project: {
+          neutral: { $round: { $multiply: ['$neutral', 100] } },
+          happy: { $round: { $multiply: ['$happy', 100] } },
+          sad: { $round: { $multiply: ['$sad', 100] } },
+          angry: { $round: { $multiply: ['$angry', 100] } },
+          fearful: { $round: { $multiply: ['$fearful', 100] } },
+          disgusted: { $round: { $multiply: ['$disgusted', 100] } },
+          surprised: { $round: { $multiply: ['$surprised', 100] } },
+        },
+      },
+      { $unset: ['_id'] },
+    ]),
+    Recognition.aggregate([
+      {
+        $match: { emoviewCode: { $in: [...emoviewCode] } },
+      },
+      {
+        $group: {
+          _id: null,
+          positive: { $sum: { $add: ['$happy', '$surprised'] } },
+          negative: {
+            $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] },
+          },
+          count: {
+            $sum: {
+              $add: [
+                '$happy',
+                '$sad',
+                '$angry',
+                '$fearful',
+                '$disgusted',
+                '$surprised',
+              ],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          positive: {
+            $cond: [
+              { $eq: ['$count', 0] },
+              0,
+              {
+                $round: {
+                  $multiply: [{ $divide: ['$positive', '$count'] }, 100],
+                },
+              },
+            ],
+          },
+          negative: {
+            $cond: [
+              { $eq: ['$count', 0] },
+              0,
+              {
+                $round: {
+                  $multiply: [{ $divide: ['$negative', '$count'] }, 100],
+                },
+              },
+            ],
+          },
+        },
+      },
+      { $unset: ['_id', 'count'] },
+    ]),
+  ])
+  const labelsOverview = [
+    'Neutral',
+    'Happy',
+    'Sad',
+    'Angry',
+    'Fearful',
+    'Disgusted',
+    'Surprised',
+  ]
+  const labelsSummary = ['Positive', 'Negative']
+  return {
+    // recognitionStream: [...recognitionDetail],
+    recognitionsDetail: {
+      labels: recognitionDetail.map(({ createdAt }) => createdAt),
+      class: recognitionDetail.map(({ meetCode }) => meetCode),
+      meeting: recognitionDetail.map(({ emoviewCode }) => emoviewCode),
+      user: recognitionDetail.map(({ userId }) => userId),
+      neutral: recognitionDetail.map(({ neutral }) => neutral),
+      happy: recognitionDetail.map(({ happy }) => happy),
+      sad: recognitionDetail.map(({ sad }) => sad),
+      angry: recognitionDetail.map(({ angry }) => angry),
+      fearful: recognitionDetail.map(({ fearful }) => fearful),
+      disgusted: recognitionDetail.map(({ disgusted }) => disgusted),
+      surprised: recognitionDetail.map(({ surprised }) => surprised),
+      image: recognitionDetail.map(({ image }) => image),
+    },
+    recognitionsOverview: {
+      labels: labelsOverview,
+      datas: Object.values(recognitionsOverview),
+    },
+    recognitionsSummary: {
+      labels: labelsSummary,
+      datas: Object.values(recognitionsSummary),
+    },
+  }
+}
+
 const create = async ({ userId, image, rest }) => {
   const { secure_url } = await cloudinary.uploader.upload(image, {
     folder: `${rest.emoviewCode}/${userId}`,
@@ -642,6 +787,7 @@ module.exports = {
   getFromAllInstance,
   getOverview,
   getSummary,
+  getArchive,
   create,
   update,
   remove,
