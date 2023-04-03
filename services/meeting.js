@@ -1,82 +1,119 @@
 const Meeting = require('../models/meeting')
+const Class = require('../models/class')
 const io = require('../utils/socketio')
 
 let recognitionInterval = {}
 
 const get = async ({ role, createdBy }) => {
-  return await Meeting.find(
-    role.includes('superadmin') ? {} : { createdBy }
-  ).sort({ createdAt: 'desc' })
+  return Meeting.find(
+      role.includes('superadmin') ? {} : {createdBy}
+  ).sort({createdAt: 'desc'});
 }
 
 const getById = async ({ id }) => {
   return await Meeting.findById(id)
 }
 
+const getByEmoviewCode = async ({ emoviewCode }) => {
+  return await Meeting.find({emoviewCode: emoviewCode});
+}
+
+const getByMeetCode = async ({ meetCode }) => {
+  return await Meeting.find({meetCode: meetCode}).sort({ createdAt: 'desc' });
+};
+
 const getCount = async ({ role, createdBy }) => {
   return await Meeting.count(role.includes('superadmin') ? {} : { createdBy })
 }
 
+const getCountMeetInstance = async ({ meetCode }) => {
+  return await Meeting.count({ meetCode: meetCode });
+};
+
 const create = async ({ body, createdBy }) => {
-  const data = new Meeting({ ...body, createdBy })
-  return await data.save()
+  const timestamp = new Date(Date.now()).toISOString();
+  const emoviewCode = timestamp.replace(/[-:]/g, '').replace('.', '').replace('T', '').replace('Z', '')
+  const data = new Meeting({ ...body, emoviewCode, createdBy });
+  await Class.updateOne({meetCode: body.meetCode}, { countOfMeetings: body.countOfMeetings}).exec();
+  await data.save();
+  // let count = await Class.findOne({ meetCode: body.meetCode });
+  // count.countOfMeetings += 1;
+  // await Class.updateOne({ meetCode: body.meetCode }, { countOfMeetings: count }).exec();
+  return data;
 }
 
-const update = async ({ id, body }) => {
-  return await Meeting.findByIdAndUpdate(id, body, {
+const update = async ({ emoviewCode, body }) => {
+  return await Meeting.findOneAndUpdate({emoviewCode: emoviewCode}, {...body}, {
     upsert: true,
     new: true,
   })
 }
 
-const addParticipant = async ({ id, body }) => {
-  const doc = await Meeting.findOne({ code: id })
+const addParticipant = async ({ emoviewCode, body }) => {
+  const doc = await Meeting.findOne({ emoviewCode: emoviewCode })
   doc.participants.addToSet({
     _id: body.userId,
     ...body,
   })
   const socket = io()
-  socket.to(id).emit('USER_JOINED')
+  socket.to(emoviewCode).emit('USER_JOINED')
   return await doc.save()
 }
 
-const setStart = async ({ meetingId, body }) => {
+const setStart = async ({ emoviewCode, body }) => {
   const { status } = body
   if (status === 'started') {
-    recognitionInterval[meetingId] = setInterval(() => {
+    recognitionInterval[emoviewCode] = setInterval(() => {
       const socket = io()
-      socket.to(`student-${meetingId}`).emit('RECOGNITION_STATUS', status)
+      socket.to(`student-${emoviewCode}`).emit('RECOGNITION_STATUS', status)
     }, 5000)
   } else {
-    clearInterval(recognitionInterval[meetingId])
-    delete recognitionInterval[meetingId]
+    clearInterval(recognitionInterval[emoviewCode])
+    delete recognitionInterval[emoviewCode]
   }
   const data = status
   return data
 }
 
-const setStop = async ({ meetingId }) => {
+const setStop = async ({ emoviewCode }) => {
   const status = 'stopped'
   const socket = io()
-  socket.to(meetingId).emit('RECOGNITION_STATUS', status)
+  socket.to(emoviewCode).emit('RECOGNITION_STATUS', status)
   const data = 'Stop recognition'
   return data
 }
 
-const remove = async ({ id }) => {
-  const data = await Meeting.findById(id)
+const remove = async ({ emoviewCode }) => {
+  const data = await Meeting.findOneAndDelete({emoviewCode: emoviewCode})
   if (!data) return
   return await data.remove()
 }
 
+const removeByEmoviewCode = async ({ emoviewCode }) => {
+  const data = await Meeting.find({emoviewCode: emoviewCode});
+  if (!data) return
+  return await data.remove()
+};
+
+const removeByMeetCode = async ({ meetCode }) => { 
+  const data = await Meeting.find({meetCode: meetCode});
+  if (!data) return
+  return await data.deleteMany();
+};
+
 module.exports = {
   get,
-  getById,
+  getById, // replace with getByEmoviewCode
+  getByEmoviewCode, // get meeting using emoview code (individual)
+  getByMeetCode, // get meeting using meet code (collectively)
   getCount,
+  getCountMeetInstance,
   create,
   update,
   addParticipant,
   setStart,
   setStop,
-  remove,
+  remove, // replace with removeByEmoviewCode
+  removeByEmoviewCode, // remove meeting using emoview code (individual)
+  removeByMeetCode, // remove meeting using meet code (collectively)
 }

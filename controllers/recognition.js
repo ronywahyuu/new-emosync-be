@@ -3,7 +3,7 @@ const recognition = require('../services/recognition')
 const get = async (req, res, next) => {
   try {
     const data = await recognition.get({
-      id: req.params.id,
+      emoviewCode: req.params.emoviewCode,
       limit: req.query.limit,
     })
     if (!data) {
@@ -19,7 +19,7 @@ const get = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const data = await recognition.getById({
-      id: req.params.id,
+      emoviewCode: req.params.emoviewCode,
       userId: req.params.userId,
       limit: req.query.limit,
     })
@@ -67,6 +67,22 @@ const getSummary = async (req, res, next) => {
   }
 }
 
+const getArchive = async (req, res, next) => {
+  try {
+    const { ids } = req.body
+    const data = await recognition.getArchive({
+      emoviewCode: ids,
+    })
+    if (!data) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
 const create = async (req, res, next) => {
   try {
     const { 'https://customclaim.com/id': userId } = req.auth.payload
@@ -85,7 +101,7 @@ const create = async (req, res, next) => {
 const update = async (req, res, next) => {
   try {
     const data = await recognition.update({
-      id: req.params.id,
+      emoviewCode: req.params.emoviewCode,
       isStart: req.body.isStart,
       code: req.body.code,
     })
@@ -101,7 +117,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   try {
-    const data = await recognition.remove({ id: req.params.id })
+    const data = await recognition.remove({ emoviewCode: req.params.emoviewCode })
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -117,6 +133,7 @@ module.exports = {
   getById,
   getOverview,
   getSummary,
+  getArchive,
   create,
   update,
   remove,
