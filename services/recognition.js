@@ -423,6 +423,49 @@ const getSummary = async ({ role, createdBy }) => {
   return data[0] ? { labels, datas: Object.values(data[0]) } : {}
 }
 
+const getArchive = async ({ limit, ids }) => {
+  const [recognitionDetail] = await Promise.all([
+    Recognition.aggregate([
+      { $match: { meetingId: { $in: [...ids] } } },
+      {
+        $project: {
+          _id: 0,
+          createdAt: 1,
+          meetingId: 1,
+          userId: 1,
+          neutral: { $round: ['$neutral', 2] },
+          happy: { $round: ['$happy', 2] },
+          sad: { $round: ['$sad', 2] },
+          angry: { $round: ['$angry', 2] },
+          fearful: { $round: ['$fearful', 2] },
+          disgusted: { $round: ['$disgusted', 2] },
+          surprised: { $round: ['$surprised', 2] },
+          image: 1,
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      ...(limit ? [{ $limit: parseInt(limit, 10) }] : []),
+      { $sort: { createdAt: 1 } },
+    ]),
+  ])
+  return {
+    // recognitionStream: [...recognitionDetail],
+    // recognitionsDetail: {
+    labels: recognitionDetail.map(({ createdAt }) => createdAt),
+    meeting: recognitionDetail.map(({ meetingId }) => meetingId),
+    user: recognitionDetail.map(({ userId }) => userId),
+    neutral: recognitionDetail.map(({ neutral }) => neutral),
+    happy: recognitionDetail.map(({ happy }) => happy),
+    sad: recognitionDetail.map(({ sad }) => sad),
+    angry: recognitionDetail.map(({ angry }) => angry),
+    fearful: recognitionDetail.map(({ fearful }) => fearful),
+    disgusted: recognitionDetail.map(({ disgusted }) => disgusted),
+    surprised: recognitionDetail.map(({ surprised }) => surprised),
+    image: recognitionDetail.map(({ image }) => image),
+    // },
+  }
+}
+
 const create = async ({ userId, image, rest }) => {
   const { secure_url } = await cloudinary.uploader.upload(image, {
     folder: `${rest.meetingId}/${userId}`,
@@ -488,6 +531,7 @@ module.exports = {
   getById,
   getOverview,
   getSummary,
+  getArchive,
   create,
   update,
   remove,
