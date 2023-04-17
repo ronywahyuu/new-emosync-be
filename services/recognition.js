@@ -337,7 +337,7 @@ const getById = async ({ emoviewCode, userId, limit }) => {
           { $sort: { createdAt: 1 } },
         ])
       : Recognition.find({
-          meetingId: emoviewCode,
+          emoviewCode: emoviewCode,
           userId: userId,
         }).select('-meeting -user'),
     Recognition.aggregate([
