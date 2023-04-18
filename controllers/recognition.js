@@ -33,6 +33,37 @@ const getById = async (req, res, next) => {
   }
 }
 
+const getByIds = async (req, res, next) => {
+  try {
+    const { ids } = req.body
+    const emoviewCode = req.params.emoviewCode
+    const limit = req.query.limit
+
+    let data = []
+    await Promise.all(
+      ids.map(async (value) => {
+        const items = await recognition.getById({
+          emoviewCode: emoviewCode,
+          userId: value,
+          limit: limit,
+        })
+        data.push({
+          userId: value,
+          recognitionsOverview: items.recognitionsOverview,
+          recognitionsSummary: items.recognitionsSummary,
+        })
+      })
+    )
+    if (!data) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
 const getOverview = async (req, res, next) => {
   try {
     const {
@@ -117,7 +148,9 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   try {
-    const data = await recognition.remove({ emoviewCode: req.params.emoviewCode })
+    const data = await recognition.remove({
+      emoviewCode: req.params.emoviewCode,
+    })
     if (!data) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -131,6 +164,7 @@ const remove = async (req, res, next) => {
 module.exports = {
   get,
   getById,
+  getByIds,
   getOverview,
   getSummary,
   getArchive,
