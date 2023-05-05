@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
 
 const recognitionSchema = new mongoose.Schema({
+  meetCode: String,
+  emoviewCode: String,
+  userId: String,
   neutral: Number,
   happy: Number,
   sad: Number,
@@ -10,8 +13,6 @@ const recognitionSchema = new mongoose.Schema({
   surprised: Number,
   predict: String,
   image: String,
-  meetingId: String,
-  userId: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 })

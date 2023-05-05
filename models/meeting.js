@@ -3,20 +3,17 @@ const Recognition = require('./recognition')
 
 const meetingSchema = new mongoose.Schema(
   {
+    emoviewCode: String, // unique code for every pertemuan
+    meetCode: String, // google meet code
     name: String,
     subject: String,
     description: String,
     link: String,
-    code: String,
     createdBy: String,
     isStart: { type: Boolean, default: false },
-    startedAt: { type: Date, default: Date.now },
+    startedAt: { type: Date, default: null },
     isEnded: { type: Boolean, default: false },
     endedAt: { type: Date, default: null },
-    configuration: {
-      size: String,
-      emotionDisplay: String,
-    },
     participants: [
       {
         _id: String,
@@ -35,7 +32,7 @@ meetingSchema.set('toJSON', {
 })
 
 meetingSchema.pre('remove', function () {
-  return Recognition.deleteMany({ meetingId: this._id })
+  return Recognition.deleteMany({ emoviewCode: this.emoviewCode })
 })
 
 module.exports = mongoose.model('Meeting', meetingSchema)

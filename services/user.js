@@ -4,27 +4,40 @@ const User = require('../models/user')
 const Recognition = require('../models/recognition')
 
 const get = async ({ role, meetingId, createdBy, userRole }) => {
-  return await User.find({
+  return User.find({
     ...(meetingId && {
       userId: {
-        $in: await Recognition.find({ meetingId }).distinct('userId'),
+        $in: await Recognition.find({meetingId}).distinct('userId'),
       },
     }),
     ...(!meetingId &&
-      role &&
-      role !== 'teacher' && {
-        userId: {
-          $in: await Recognition.find({
-            meetingId: {
-              $in: await Meeting.find({
-                ...(!userRole.includes('superadmin') && { createdBy }),
-              }).distinct('code'),
-            },
-          }).distinct('userId'),
-        },
-      }),
-    ...(role && { role }),
-  }).sort({ createdAt: 'desc' })
+        role &&
+        role !== 'teacher' && {
+          userId: {
+            $in: await Recognition.find({
+              meetingId: {
+                $in: await Meeting.find({
+                  ...(!userRole.includes('superadmin') && {createdBy}),
+                }).distinct('emoviewCode'),
+              },
+            }).distinct('userId'),
+          },
+        }),
+    ...(role && {role}),
+  }).sort({createdAt: 'desc'});
+}
+
+const getSameMeeting = async ({ emoviewCode }) => {
+  let students = [];
+  const {participants} = await Meeting.findOne({emoviewCode: emoviewCode}, 'participants')
+  for (const value of participants) {
+    const {role} = await User.findOne({userId: value.userId}, 'role');
+    if (role === 'student') {
+      students.push(value);
+    }
+  }
+  return students;
+  // return await Meeting.find({meetCode: emoviewCode}, 'participants');
 }
 
 const getById = async ({ id }) => {
@@ -57,10 +70,10 @@ const getOverview = async ({ id, role, createdBy }) => {
     {
       $match: {
         userId: id,
-        meetingId: {
+        emoviewCode: {
           $in: await Meeting.find({
             ...(!role.includes('superadmin') && { createdBy }),
-          }).distinct('code'),
+          }).distinct('emoviewCode'),
         },
       },
     },
@@ -106,10 +119,10 @@ const getSummary = async ({ id, role, createdBy }) => {
     {
       $match: {
         userId: id,
-        meetingId: {
+        emoviewCode: {
           $in: await Meeting.find({
             ...(!role.includes('superadmin') && { createdBy }),
-          }).distinct('code'),
+          }).distinct('emoviewCode'),
         },
       },
     },
@@ -200,6 +213,7 @@ module.exports = {
   getCount,
   getOverview,
   getSummary,
+  getSameMeeting,
   create,
   update,
   remove,

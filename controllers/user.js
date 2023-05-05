@@ -96,6 +96,19 @@ const getSummary = async (req, res, next) => {
   }
 }
 
+const getSameMeeting = async (req, res, next) => {
+  try {
+    const data = await user.getSameMeeting({ emoviewCode: req.params.emoviewCode })
+    // if (!data.length) {
+    //   return res.status(404).send({ message: 'Data not found!' })
+    // }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
 const create = async (req, res, next) => {
   try {
     const data = await user.create({ body: req.body })
@@ -143,6 +156,7 @@ module.exports = {
   getCount,
   getOverview,
   getSummary,
+  getSameMeeting,
   create,
   update,
   remove,
