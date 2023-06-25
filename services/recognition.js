@@ -13,41 +13,47 @@ const get = async ({ emoviewCode, limit }) => {
     meeting,
     recognitionDetail,
     recognitionsOverview,
-    recognitionsSummary,
+    recognitionsSummary
   ] = await Promise.all([
     Meeting.findOne({ emoviewCode: emoviewCode }),
     Recognition.aggregate([
       { $match: { emoviewCode: emoviewCode } },
       {
         $group: {
-          _id: { $toString: '$createdAt' },
+          _id: {
+            $dateToString: {
+              format: '%Y-%m-%d %H:%M:%S',
+              date: { $toDate: { $floor: { $toDecimal: '$createdAt' } } }
+            }
+          },
           neutral: { $avg: '$neutral' },
           happy: { $avg: '$happy' },
           sad: { $avg: '$sad' },
           angry: { $avg: '$angry' },
           fearful: { $avg: '$fearful' },
           disgusted: { $avg: '$disgusted' },
-          surprised: { $avg: '$surprised' },
-        },
+          surprised: { $avg: '$surprised' }
+        }
       },
       {
         $project: {
+          _id: { $dateFromString: { dateString: '$_id', format: '%Y-%m-%d %H:%M:%S' } },
           neutral: { $round: ['$neutral', 2] },
           happy: { $round: ['$happy', 2] },
           sad: { $round: ['$sad', 2] },
           angry: { $round: ['$angry', 2] },
           fearful: { $round: ['$fearful', 2] },
           disgusted: { $round: ['$disgusted', 2] },
-          surprised: { $round: ['$surprised', 2] },
-        },
+          surprised: { $round: ['$surprised', 2] }
+        }
       },
       { $sort: { _id: -1 } },
       ...(limit ? [{ $limit: parseInt(limit, 10) }] : []),
-      { $sort: { _id: 1 } },
+      { $sort: { _id: 1 } }
     ]),
     Recognition.aggregate([
       {
-        $match: { emoviewCode: emoviewCode },
+        $match: { emoviewCode: emoviewCode }
       },
       {
         $group: {
@@ -58,8 +64,8 @@ const get = async ({ emoviewCode, limit }) => {
           angry: { $avg: '$angry' },
           fearful: { $avg: '$fearful' },
           disgusted: { $avg: '$disgusted' },
-          surprised: { $avg: '$surprised' },
-        },
+          surprised: { $avg: '$surprised' }
+        }
       },
       {
         $project: {
@@ -69,21 +75,21 @@ const get = async ({ emoviewCode, limit }) => {
           angry: { $round: { $multiply: ['$angry', 100] } },
           fearful: { $round: { $multiply: ['$fearful', 100] } },
           disgusted: { $round: { $multiply: ['$disgusted', 100] } },
-          surprised: { $round: { $multiply: ['$surprised', 100] } },
-        },
+          surprised: { $round: { $multiply: ['$surprised', 100] } }
+        }
       },
-      { $unset: ['_id'] },
+      { $unset: ['_id'] }
     ]),
     Recognition.aggregate([
       {
-        $match: { emoviewCode: emoviewCode },
+        $match: { emoviewCode: emoviewCode }
       },
       {
         $group: {
           _id: null,
           positive: { $sum: { $add: ['$happy', '$surprised'] } },
           negative: {
-            $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] },
+            $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] }
           },
           count: {
             $sum: {
@@ -93,11 +99,11 @@ const get = async ({ emoviewCode, limit }) => {
                 '$angry',
                 '$fearful',
                 '$disgusted',
-                '$surprised',
-              ],
-            },
-          },
-        },
+                '$surprised'
+              ]
+            }
+          }
+        }
       },
       {
         $project: {
@@ -107,10 +113,10 @@ const get = async ({ emoviewCode, limit }) => {
               0,
               {
                 $round: {
-                  $multiply: [{ $divide: ['$positive', '$count'] }, 100],
-                },
-              },
-            ],
+                  $multiply: [{ $divide: ['$positive', '$count'] }, 100]
+                }
+              }
+            ]
           },
           negative: {
             $cond: [
@@ -118,15 +124,15 @@ const get = async ({ emoviewCode, limit }) => {
               0,
               {
                 $round: {
-                  $multiply: [{ $divide: ['$negative', '$count'] }, 100],
-                },
-              },
-            ],
-          },
-        },
+                  $multiply: [{ $divide: ['$negative', '$count'] }, 100]
+                }
+              }
+            ]
+          }
+        }
       },
-      { $unset: ['_id', 'count'] },
-    ]),
+      { $unset: ['_id', 'count'] }
+    ])
   ])
   const labelsOverview = [
     'Neutral',
@@ -135,7 +141,7 @@ const get = async ({ emoviewCode, limit }) => {
     'Angry',
     'Fearful',
     'Disgusted',
-    'Surprised',
+    'Surprised'
   ]
   const labelsSummary = ['Positive', 'Negative']
   if (!meeting) return
@@ -143,11 +149,11 @@ const get = async ({ emoviewCode, limit }) => {
     recognitionStream: [...recognitionDetail],
     recognitionsOverview: {
       labels: labelsOverview,
-      datas: Object.values(recognitionsOverview[0]),
+      datas: Object.values(recognitionsOverview[0])
     },
     recognitionsSummary: {
       labels: labelsSummary,
-      datas: Object.values(recognitionsSummary[0]),
+      datas: Object.values(recognitionsSummary[0])
     },
     recognitionsDetail: {
       labels: recognitionDetail.map(({ _id }) => _id),
@@ -157,8 +163,8 @@ const get = async ({ emoviewCode, limit }) => {
       angry: recognitionDetail.map(({ angry }) => angry),
       fearful: recognitionDetail.map(({ fearful }) => fearful),
       disgusted: recognitionDetail.map(({ disgusted }) => disgusted),
-      surprised: recognitionDetail.map(({ surprised }) => surprised),
-    },
+      surprised: recognitionDetail.map(({ surprised }) => surprised)
+    }
   }
 }
 
@@ -167,7 +173,7 @@ const getFromAllInstance = async ({ meetCode, limit }) => {
     meeting,
     recognitionDetail,
     recognitionsOverview,
-    recognitionsSummary,
+    recognitionsSummary
   ] = await Promise.all([
     Meeting.find({ meetCode: meetCode }),
     Recognition.aggregate([
@@ -181,8 +187,8 @@ const getFromAllInstance = async ({ meetCode, limit }) => {
           angry: { $avg: '$angry' },
           fearful: { $avg: '$fearful' },
           disgusted: { $avg: '$disgusted' },
-          surprised: { $avg: '$surprised' },
-        },
+          surprised: { $avg: '$surprised' }
+        }
       },
       {
         $project: {
@@ -192,16 +198,16 @@ const getFromAllInstance = async ({ meetCode, limit }) => {
           angry: { $round: ['$angry', 2] },
           fearful: { $round: ['$fearful', 2] },
           disgusted: { $round: ['$disgusted', 2] },
-          surprised: { $round: ['$surprised', 2] },
-        },
+          surprised: { $round: ['$surprised', 2] }
+        }
       },
       { $sort: { _id: -1 } },
       ...(limit ? [{ $limit: parseInt(limit, 10) }] : []),
-      { $sort: { _id: 1 } },
+      { $sort: { _id: 1 } }
     ]),
     Recognition.aggregate([
       {
-        $match: { meetCode: meetCode },
+        $match: { meetCode: meetCode }
       },
       {
         $group: {
@@ -212,8 +218,8 @@ const getFromAllInstance = async ({ meetCode, limit }) => {
           angry: { $avg: '$angry' },
           fearful: { $avg: '$fearful' },
           disgusted: { $avg: '$disgusted' },
-          surprised: { $avg: '$surprised' },
-        },
+          surprised: { $avg: '$surprised' }
+        }
       },
       {
         $project: {
@@ -223,21 +229,21 @@ const getFromAllInstance = async ({ meetCode, limit }) => {
           angry: { $round: { $multiply: ['$angry', 100] } },
           fearful: { $round: { $multiply: ['$fearful', 100] } },
           disgusted: { $round: { $multiply: ['$disgusted', 100] } },
-          surprised: { $round: { $multiply: ['$surprised', 100] } },
-        },
+          surprised: { $round: { $multiply: ['$surprised', 100] } }
+        }
       },
-      { $unset: ['_id'] },
+      { $unset: ['_id'] }
     ]),
     Recognition.aggregate([
       {
-        $match: { meetCode: meetCode },
+        $match: { meetCode: meetCode }
       },
       {
         $group: {
           _id: null,
           positive: { $sum: { $add: ['$happy', '$surprised'] } },
           negative: {
-            $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] },
+            $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] }
           },
           count: {
             $sum: {
@@ -247,11 +253,11 @@ const getFromAllInstance = async ({ meetCode, limit }) => {
                 '$angry',
                 '$fearful',
                 '$disgusted',
-                '$surprised',
-              ],
-            },
-          },
-        },
+                '$surprised'
+              ]
+            }
+          }
+        }
       },
       {
         $project: {
@@ -261,10 +267,10 @@ const getFromAllInstance = async ({ meetCode, limit }) => {
               0,
               {
                 $round: {
-                  $multiply: [{ $divide: ['$positive', '$count'] }, 100],
-                },
-              },
-            ],
+                  $multiply: [{ $divide: ['$positive', '$count'] }, 100]
+                }
+              }
+            ]
           },
           negative: {
             $cond: [
@@ -272,15 +278,15 @@ const getFromAllInstance = async ({ meetCode, limit }) => {
               0,
               {
                 $round: {
-                  $multiply: [{ $divide: ['$negative', '$count'] }, 100],
-                },
-              },
-            ],
-          },
-        },
+                  $multiply: [{ $divide: ['$negative', '$count'] }, 100]
+                }
+              }
+            ]
+          }
+        }
       },
-      { $unset: ['_id', 'count'] },
-    ]),
+      { $unset: ['_id', 'count'] }
+    ])
   ])
   const labelsOverview = [
     'Neutral',
@@ -289,7 +295,7 @@ const getFromAllInstance = async ({ meetCode, limit }) => {
     'Angry',
     'Fearful',
     'Disgusted',
-    'Surprised',
+    'Surprised'
   ]
   const labelsSummary = ['Positive', 'Negative']
   if (!meeting) return
@@ -297,11 +303,11 @@ const getFromAllInstance = async ({ meetCode, limit }) => {
     recognitionStream: [...recognitionDetail],
     recognitionsOverview: {
       labels: labelsOverview,
-      datas: Object.values(recognitionsOverview[0]),
+      datas: Object.values(recognitionsOverview[0])
     },
     recognitionsSummary: {
       labels: labelsSummary,
-      datas: Object.values(recognitionsSummary[0]),
+      datas: Object.values(recognitionsSummary[0])
     },
     recognitionsDetail: {
       labels: recognitionDetail.map(({ _id }) => _id),
@@ -311,8 +317,8 @@ const getFromAllInstance = async ({ meetCode, limit }) => {
       angry: recognitionDetail.map(({ angry }) => angry),
       fearful: recognitionDetail.map(({ fearful }) => fearful),
       disgusted: recognitionDetail.map(({ disgusted }) => disgusted),
-      surprised: recognitionDetail.map(({ surprised }) => surprised),
-    },
+      surprised: recognitionDetail.map(({ surprised }) => surprised)
+    }
   }
 }
 
@@ -321,31 +327,31 @@ const getById = async ({ emoviewCode, userId, limit }) => {
     meeting,
     recognitionDetail,
     recognitionsOverview,
-    recognitionsSummary,
+    recognitionsSummary
   ] = await Promise.all([
     Meeting.findOne({ emoviewCode: emoviewCode }),
     limit
       ? Recognition.aggregate([
-          {
-            $match: {
-              emoviewCode: emoviewCode,
-              userId: userId,
-            },
-          },
-          { $sort: { createdAt: -1 } },
-          { $limit: parseInt(limit, 10) },
-          { $sort: { createdAt: 1 } },
-        ])
+        {
+          $match: {
+            emoviewCode: emoviewCode,
+            userId: userId
+          }
+        },
+        { $sort: { createdAt: -1 } },
+        { $limit: parseInt(limit, 10) },
+        { $sort: { createdAt: 1 } }
+      ])
       : Recognition.find({
-          emoviewCode: emoviewCode,
-          userId: userId,
-        }).select('-meeting -user'),
+        emoviewCode: emoviewCode,
+        userId: userId
+      }).select('-meeting -user'),
     Recognition.aggregate([
       {
         $match: {
           emoviewCode: emoviewCode,
-          userId: userId,
-        },
+          userId: userId
+        }
       },
       {
         $group: {
@@ -356,8 +362,8 @@ const getById = async ({ emoviewCode, userId, limit }) => {
           angry: { $avg: '$angry' },
           fearful: { $avg: '$fearful' },
           disgusted: { $avg: '$disgusted' },
-          surprised: { $avg: '$surprised' },
-        },
+          surprised: { $avg: '$surprised' }
+        }
       },
       {
         $project: {
@@ -367,24 +373,24 @@ const getById = async ({ emoviewCode, userId, limit }) => {
           angry: { $round: { $multiply: ['$angry', 100] } },
           fearful: { $round: { $multiply: ['$fearful', 100] } },
           disgusted: { $round: { $multiply: ['$disgusted', 100] } },
-          surprised: { $round: { $multiply: ['$surprised', 100] } },
-        },
+          surprised: { $round: { $multiply: ['$surprised', 100] } }
+        }
       },
-      { $unset: ['_id'] },
+      { $unset: ['_id'] }
     ]),
     Recognition.aggregate([
       {
         $match: {
           emoviewCode: emoviewCode,
-          userId: userId,
-        },
+          userId: userId
+        }
       },
       {
         $group: {
           _id: null,
           positive: { $sum: { $add: ['$happy', '$surprised'] } },
           negative: {
-            $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] },
+            $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] }
           },
           count: {
             $sum: {
@@ -394,11 +400,11 @@ const getById = async ({ emoviewCode, userId, limit }) => {
                 '$angry',
                 '$fearful',
                 '$disgusted',
-                '$surprised',
-              ],
-            },
-          },
-        },
+                '$surprised'
+              ]
+            }
+          }
+        }
       },
       {
         $project: {
@@ -408,10 +414,10 @@ const getById = async ({ emoviewCode, userId, limit }) => {
               0,
               {
                 $round: {
-                  $multiply: [{ $divide: ['$positive', '$count'] }, 100],
-                },
-              },
-            ],
+                  $multiply: [{ $divide: ['$positive', '$count'] }, 100]
+                }
+              }
+            ]
           },
           negative: {
             $cond: [
@@ -419,15 +425,15 @@ const getById = async ({ emoviewCode, userId, limit }) => {
               0,
               {
                 $round: {
-                  $multiply: [{ $divide: ['$negative', '$count'] }, 100],
-                },
-              },
-            ],
-          },
-        },
+                  $multiply: [{ $divide: ['$negative', '$count'] }, 100]
+                }
+              }
+            ]
+          }
+        }
       },
-      { $unset: ['_id', 'count'] },
-    ]),
+      { $unset: ['_id', 'count'] }
+    ])
   ])
   const labelsOverview = [
     'Neutral',
@@ -436,7 +442,7 @@ const getById = async ({ emoviewCode, userId, limit }) => {
     'Angry',
     'Fearful',
     'Disgusted',
-    'Surprised',
+    'Surprised'
   ]
   const labelsSummary = ['Positive', 'Negative']
   if (!meeting) return
@@ -444,11 +450,11 @@ const getById = async ({ emoviewCode, userId, limit }) => {
     recognitionStream: [...recognitionDetail],
     recognitionsOverview: {
       labels: labelsOverview,
-      datas: Object.values(recognitionsOverview[0]),
+      datas: Object.values(recognitionsOverview[0])
     },
     recognitionsSummary: {
       labels: labelsSummary,
-      datas: Object.values(recognitionsSummary[0]),
+      datas: Object.values(recognitionsSummary[0])
     },
     recognitionsDetail: {
       labels: recognitionDetail.map(({ createdAt }) => createdAt),
@@ -459,8 +465,8 @@ const getById = async ({ emoviewCode, userId, limit }) => {
       fearful: recognitionDetail.map(({ fearful }) => fearful),
       disgusted: recognitionDetail.map(({ disgusted }) => disgusted),
       surprised: recognitionDetail.map(({ surprised }) => surprised),
-      image: recognitionDetail.map(({ image }) => image),
-    },
+      image: recognitionDetail.map(({ image }) => image)
+    }
   }
 }
 
@@ -470,10 +476,10 @@ const getOverview = async ({ role, createdBy }) => {
       $match: {
         emoviewCode: {
           $in: await Meeting.find({
-            ...(!role.includes('superadmin') && { createdBy }),
-          }).distinct('emoviewCode'),
-        },
-      },
+            ...(!role.includes('superadmin') && { createdBy })
+          }).distinct('emoviewCode')
+        }
+      }
     },
     {
       $group: {
@@ -484,8 +490,8 @@ const getOverview = async ({ role, createdBy }) => {
         angry: { $avg: '$angry' },
         fearful: { $avg: '$fearful' },
         disgusted: { $avg: '$disgusted' },
-        surprised: { $avg: '$surprised' },
-      },
+        surprised: { $avg: '$surprised' }
+      }
     },
     {
       $project: {
@@ -495,10 +501,10 @@ const getOverview = async ({ role, createdBy }) => {
         angry: { $round: { $multiply: ['$angry', 100] } },
         fearful: { $round: { $multiply: ['$fearful', 100] } },
         disgusted: { $round: { $multiply: ['$disgusted', 100] } },
-        surprised: { $round: { $multiply: ['$surprised', 100] } },
-      },
+        surprised: { $round: { $multiply: ['$surprised', 100] } }
+      }
     },
-    { $unset: ['emoviewCode'] },
+    { $unset: ['emoviewCode'] }
   ])
   const labels = [
     'Neutral',
@@ -507,7 +513,7 @@ const getOverview = async ({ role, createdBy }) => {
     'Angry',
     'Fearful',
     'Disgusted',
-    'Surprised',
+    'Surprised'
   ]
   return data[0] ? { labels, datas: Object.values(data[0]) } : {}
 }
@@ -518,17 +524,17 @@ const getSummary = async ({ role, createdBy }) => {
       $match: {
         emoviewCode: {
           $in: await Meeting.find({
-            ...(!role.includes('superadmin') && { createdBy }),
-          }).distinct('emoviewCode'),
-        },
-      },
+            ...(!role.includes('superadmin') && { createdBy })
+          }).distinct('emoviewCode')
+        }
+      }
     },
     {
       $group: {
         _id: null,
         positive: { $sum: { $add: ['$happy', '$surprised'] } },
         negative: {
-          $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] },
+          $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] }
         },
         count: {
           $sum: {
@@ -538,11 +544,11 @@ const getSummary = async ({ role, createdBy }) => {
               '$angry',
               '$fearful',
               '$disgusted',
-              '$surprised',
-            ],
-          },
-        },
-      },
+              '$surprised'
+            ]
+          }
+        }
+      }
     },
     {
       $project: {
@@ -552,10 +558,10 @@ const getSummary = async ({ role, createdBy }) => {
             0,
             {
               $round: {
-                $multiply: [{ $divide: ['$positive', '$count'] }, 100],
-              },
-            },
-          ],
+                $multiply: [{ $divide: ['$positive', '$count'] }, 100]
+              }
+            }
+          ]
         },
         negative: {
           $cond: [
@@ -563,14 +569,14 @@ const getSummary = async ({ role, createdBy }) => {
             0,
             {
               $round: {
-                $multiply: [{ $divide: ['$negative', '$count'] }, 100],
-              },
-            },
-          ],
-        },
-      },
+                $multiply: [{ $divide: ['$negative', '$count'] }, 100]
+              }
+            }
+          ]
+        }
+      }
     },
-    { $unset: ['emoviewCode', 'count'] },
+    { $unset: ['emoviewCode', 'count'] }
   ])
   const labels = ['Positive', 'Negative']
   return data[0] ? { labels, datas: Object.values(data[0]) } : {}
@@ -594,16 +600,16 @@ const getArchive = async ({ limit, emoviewCode }) => {
           fearful: { $round: ['$fearful', 2] },
           disgusted: { $round: ['$disgusted', 2] },
           surprised: { $round: ['$surprised', 2] },
-          image: 1,
-        },
+          image: 1
+        }
       },
       { $sort: { createdAt: -1 } },
       ...(limit ? [{ $limit: parseInt(limit, 10) }] : []),
-      { $sort: { createdAt: 1 } },
+      { $sort: { createdAt: 1 } }
     ]),
     Recognition.aggregate([
       {
-        $match: { emoviewCode: { $in: [...emoviewCode] } },
+        $match: { emoviewCode: { $in: [...emoviewCode] } }
       },
       {
         $group: {
@@ -614,8 +620,8 @@ const getArchive = async ({ limit, emoviewCode }) => {
           angry: { $avg: '$angry' },
           fearful: { $avg: '$fearful' },
           disgusted: { $avg: '$disgusted' },
-          surprised: { $avg: '$surprised' },
-        },
+          surprised: { $avg: '$surprised' }
+        }
       },
       {
         $project: {
@@ -625,21 +631,21 @@ const getArchive = async ({ limit, emoviewCode }) => {
           angry: { $round: { $multiply: ['$angry', 100] } },
           fearful: { $round: { $multiply: ['$fearful', 100] } },
           disgusted: { $round: { $multiply: ['$disgusted', 100] } },
-          surprised: { $round: { $multiply: ['$surprised', 100] } },
-        },
+          surprised: { $round: { $multiply: ['$surprised', 100] } }
+        }
       },
-      { $unset: ['_id'] },
+      { $unset: ['_id'] }
     ]),
     Recognition.aggregate([
       {
-        $match: { emoviewCode: { $in: [...emoviewCode] } },
+        $match: { emoviewCode: { $in: [...emoviewCode] } }
       },
       {
         $group: {
           _id: null,
           positive: { $sum: { $add: ['$happy', '$surprised'] } },
           negative: {
-            $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] },
+            $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] }
           },
           count: {
             $sum: {
@@ -649,11 +655,11 @@ const getArchive = async ({ limit, emoviewCode }) => {
                 '$angry',
                 '$fearful',
                 '$disgusted',
-                '$surprised',
-              ],
-            },
-          },
-        },
+                '$surprised'
+              ]
+            }
+          }
+        }
       },
       {
         $project: {
@@ -663,10 +669,10 @@ const getArchive = async ({ limit, emoviewCode }) => {
               0,
               {
                 $round: {
-                  $multiply: [{ $divide: ['$positive', '$count'] }, 100],
-                },
-              },
-            ],
+                  $multiply: [{ $divide: ['$positive', '$count'] }, 100]
+                }
+              }
+            ]
           },
           negative: {
             $cond: [
@@ -674,15 +680,15 @@ const getArchive = async ({ limit, emoviewCode }) => {
               0,
               {
                 $round: {
-                  $multiply: [{ $divide: ['$negative', '$count'] }, 100],
-                },
-              },
-            ],
-          },
-        },
+                  $multiply: [{ $divide: ['$negative', '$count'] }, 100]
+                }
+              }
+            ]
+          }
+        }
       },
-      { $unset: ['_id', 'count'] },
-    ]),
+      { $unset: ['_id', 'count'] }
+    ])
   ])
   const labelsOverview = [
     'Neutral',
@@ -691,7 +697,7 @@ const getArchive = async ({ limit, emoviewCode }) => {
     'Angry',
     'Fearful',
     'Disgusted',
-    'Surprised',
+    'Surprised'
   ]
   const labelsSummary = ['Positive', 'Negative']
   return {
@@ -708,27 +714,27 @@ const getArchive = async ({ limit, emoviewCode }) => {
       fearful: recognitionDetail.map(({ fearful }) => fearful),
       disgusted: recognitionDetail.map(({ disgusted }) => disgusted),
       surprised: recognitionDetail.map(({ surprised }) => surprised),
-      image: recognitionDetail.map(({ image }) => image),
+      image: recognitionDetail.map(({ image }) => image)
     },
     recognitionsOverview: {
       labels: labelsOverview,
-      datas: Object.values(recognitionsOverview),
+      datas: Object.values(recognitionsOverview)
     },
     recognitionsSummary: {
       labels: labelsSummary,
-      datas: Object.values(recognitionsSummary),
-    },
+      datas: Object.values(recognitionsSummary)
+    }
   }
 }
 
 const create = async ({ userId, image, rest }) => {
   const { secure_url } = await cloudinary.uploader.upload(image, {
-    folder: `${rest.emoviewCode}/${userId}`,
+    folder: `${rest.emoviewCode}/${userId}`
   })
   const recognition = new Recognition({
     ...rest,
     image: secure_url,
-    userId,
+    userId
   })
   const data = await recognition.save()
   if (!data) return
@@ -743,10 +749,10 @@ const create = async ({ userId, image, rest }) => {
 
 const update = async ({ emoviewCode, isStart, code }) => {
   const data = await Meeting.findOneAndUpdate(
-      {emoviewCode: emoviewCode},
+    { emoviewCode: emoviewCode },
     {
       isStart,
-      ...(isStart && { startedAt: new Date() }),
+      ...(isStart && { startedAt: new Date() })
     },
     { new: true }
   )
@@ -765,8 +771,8 @@ const update = async ({ emoviewCode, isStart, code }) => {
   return data
 }
 
-const remove = async ({ emoviewCode}) => {
-  const data = await Recognition.findOne({emoviewCode: emoviewCode})
+const remove = async ({ emoviewCode }) => {
+  const data = await Recognition.findOne({ emoviewCode: emoviewCode })
   if (!data) return
   const public_id = data.image.substring(
     data.image.indexOf('.jpg') - 20,
@@ -776,7 +782,7 @@ const remove = async ({ emoviewCode}) => {
     cloudinary.uploader.destroy(
       `${data.meetingId}/${data.userId}/${public_id}`
     ),
-    data.remove(),
+    data.remove()
   ])
   return data
 }
@@ -790,5 +796,5 @@ module.exports = {
   getArchive,
   create,
   update,
-  remove,
+  remove
 }
