@@ -149,11 +149,11 @@ const get = async ({ emoviewCode, limit }) => {
     recognitionStream: [...recognitionDetail],
     recognitionsOverview: {
       labels: labelsOverview,
-      datas: Object.values(recognitionsOverview[0])
+      datas: Object.values(recognitionsOverview[0] || {})
     },
     recognitionsSummary: {
       labels: labelsSummary,
-      datas: Object.values(recognitionsSummary[0])
+      datas: Object.values(recognitionsSummary[0] || {})
     },
     recognitionsDetail: {
       labels: recognitionDetail.map(({ _id }) => _id),
