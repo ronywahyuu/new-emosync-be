@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema(
     userId: String,
     authId: String,
     email: String,
+    isPersonalityFormFilled: {
+      type: Boolean,
+      default: false,
+    },
     picture: String,
     role: {
       type: String,
