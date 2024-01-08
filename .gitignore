@@ -108,3 +108,7 @@ fly.toml
 
 # IDE
 .idea
+
+# google client secret
+project-emosync*.json
+client_secret*.json

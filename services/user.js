@@ -27,6 +27,11 @@ const get = async ({ role, meetingId, createdBy, userRole }) => {
   }).sort({createdAt: 'desc'});
 }
 
+const getIsFormFilledStatus = async ({ userId }) => {
+  const user = await User.findOne({ userId });
+  return user.isPersonalityFormFilled;
+}
+
 const getSameMeeting = async ({ emoviewCode }) => {
   let students = [];
   const {participants} = await Meeting.findOne({emoviewCode: emoviewCode}, 'participants')
@@ -217,4 +222,5 @@ module.exports = {
   create,
   update,
   remove,
+  getIsFormFilledStatus
 }

@@ -13,4 +13,6 @@ router.post('/', auth, user.create)
 router.put('/', auth, user.update)
 router.delete('/:id', auth, user.remove)
 
+router.get('/personality-form/:userId', auth, user.getIsFormFilledStatus)
+
 module.exports = router
