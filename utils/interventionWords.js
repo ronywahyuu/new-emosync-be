@@ -229,7 +229,7 @@ const DISGUST = {
   negative: {
     attention: [
       'Banyak yang lebih parah dari kamu dan mereka berhasil bertahan hingga akhir, masa kamu kalah! 😃',
-      'Si dadang beli kopeah, kamu harus sabar yah 😅',
+      'Si dadang beli kopeah, kamu harus sabar yah 🫵😅',
       'Hei [nama], kalau kamu terus merasa begitu, itu bisa ganggu fokus belajarmu!! 🤢',
       'Heii [nama], jangan begitu teruss, ayo fokus!! 🫵😫',
       'Ayo lawan rasa itu abangkuu 🔥'
