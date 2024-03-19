@@ -446,7 +446,8 @@ const getById = async ({ emoviewCode, userId, limit }) => {
   ]
   const labelsSummary = ['Positive', 'Negative']
   if (!meeting) return
-  return {
+
+  const result = {
     recognitionStream: [...recognitionDetail],
     recognitionsOverview: {
       labels: labelsOverview,
@@ -468,6 +469,12 @@ const getById = async ({ emoviewCode, userId, limit }) => {
       image: recognitionDetail.map(({ image }) => image)
     }
   }
+
+  const socket = io()
+
+  socket.emit('SEND_RECOGNITION_STREAM', result.recognitionStream)
+
+  return result
 }
 
 const getOverview = async ({ role, createdBy }) => {
