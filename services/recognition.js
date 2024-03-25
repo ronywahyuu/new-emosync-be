@@ -168,6 +168,139 @@ const get = async ({ emoviewCode, limit }) => {
   }
 }
 
+// const getOverallDataByUserId = async ({ userId }) => {
+//   const data = await Recognition.aggregate([
+//     {
+//       $match: { userId: userId }
+//     },
+//     {
+//       $group: {
+//         _id: null,
+//         neutral: { $avg: '$neutral' },
+//         happy: { $avg: '$happy' },
+//         sad: { $avg: '$sad' },
+//         angry: { $avg: '$angry' },
+//         fearful: { $avg: '$fearful' },
+//         disgusted: { $avg: '$disgusted' },
+//         surprised: { $avg: '$surprised' }
+//       }
+//     },
+//     {
+//       $project: {
+//         neutral: { $round: { $multiply: ['$neutral', 100] } },
+//         happy: { $round: { $multiply: ['$happy', 100] } },
+//         sad: { $round: { $multiply: ['$sad', 100] } },
+//         angry: { $round: { $multiply: ['$angry', 100] } },
+//         fearful: { $round: { $multiply: ['$fearful', 100] } },
+//         disgusted: { $round: { $multiply: ['$disgusted', 100] } },
+//         surprised: { $round: { $multiply: ['$surprised', 100] } }
+//       }
+//     },
+//     { $unset: ['_id'] }
+//   ]);
+
+//   const labels = [
+//     'Neutral',
+//     'Happy',
+//     'Sad',
+//     'Angry',
+//     'Fearful',
+//     'Disgusted',
+//     'Surprised'
+//   ];
+
+//   // Transforming data into the format similar to `get` function
+//   const formattedData = {
+//     recognitionsOverview: {
+//       labels,
+//       datas: Object.values(data[0] || {})
+//     },
+//     recognitionsSummary: {
+//       labels: [], // You can populate this if there's relevant summary data
+//       datas: [] // You can populate this if there's relevant summary data
+//     },
+//     recognitionsDetail: {
+//       labels: [], // You can populate this if there's relevant detail data
+//       neutral: [], // You can populate this if there's relevant detail data
+//       happy: [], // You can populate this if there's relevant detail data
+//       sad: [], // You can populate this if there's relevant detail data
+//       angry: [], // You can populate this if there's relevant detail data
+//       fearful: [], // You can populate this if there's relevant detail data
+//       disgusted: [], // You can populate this if there's relevant detail data
+//       surprised: [] // You can populate this if there's relevant detail data
+//     },
+//     recognitionStream: [] // No streaming data for overall data
+//   };
+
+//   return formattedData;
+// };
+
+const getOverallDataByUserId = async ({ userId }) => {
+  const data = await Recognition.aggregate([
+    {
+      $match: { userId: userId }
+    },
+    {
+      $group: {
+        _id: null,
+        neutral: { $avg: '$neutral' },
+        happy: { $avg: '$happy' },
+        sad: { $avg: '$sad' },
+        angry: { $avg: '$angry' },
+        fearful: { $avg: '$fearful' },
+        disgusted: { $avg: '$disgusted' },
+        surprised: { $avg: '$surprised' }
+      }
+    },
+    {
+      $project: {
+        neutral: { $multiply: [{ $avg: '$neutral' }, 100] },
+        happy: { $multiply: [{ $avg: '$happy' }, 100] },
+        sad: { $multiply: [{ $avg: '$sad' }, 100] },
+        angry: { $multiply: [{ $avg: '$angry' }, 100] },
+        fearful: { $multiply: [{ $avg: '$fearful' }, 100] },
+        disgusted: { $multiply: [{ $avg: '$disgusted' }, 100] },
+        surprised: { $multiply: [{ $avg: '$surprised' }, 100] }
+      }
+    },
+    { $unset: ['_id'] }
+  ]);
+
+  // Calculate the total positive and negative emotions
+  const positive = data[0].happy + data[0].surprised;
+  const negative = data[0].sad + data[0].angry + data[0].fearful + data[0].disgusted;
+  const total = positive + negative;
+
+  // Calculate percentages and round to integers
+  const positivePercentage = Math.round((positive / total) * 100);
+  const negativePercentage = Math.round((negative / total) * 100);
+
+  // Transforming data into the format similar to `get` function
+  const formattedData = {
+    recognitionsOverview: {
+      labels: [
+        'Neutral',
+        'Happy',
+        'Sad',
+        'Angry',
+        'Fearful',
+        'Disgusted',
+        'Surprised'
+      ],
+      datas: Object.values(data[0]).map(value => Math.round(value))
+    },
+    recognitionsSummary: {
+      labels: ['Positive', 'Negative'],
+      datas: [positivePercentage, negativePercentage]
+    },
+    recognitionsDetail: {},
+    recognitionStream: []
+  };
+
+  return formattedData;
+};
+
+
 const getFromAllInstance = async ({ meetCode, limit }) => {
   const [
     meeting,
@@ -796,6 +929,7 @@ const remove = async ({ emoviewCode }) => {
 
 module.exports = {
   get,
+  getOverallDataByUserId,
   getById,
   getFromAllInstance,
   getOverview,

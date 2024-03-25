@@ -10,6 +10,10 @@ const get = async ({role, createdBy}) => {
     ).sort({createdAt: 'desc'});
 }
 
+const getByUserId = async ({userId}) => {
+    return await Meeting.find({participants: {$elemMatch: {userId: userId}}})
+}  
+
 const getById = async ({id}) => {
     return await Meeting.findById(id)
 }
@@ -119,6 +123,7 @@ const removeByMeetCode = async ({meetCode}) => {
 
 module.exports = {
     get,
+    getByUserId,
     getById, // replace with getByEmoviewCode
     getByEmoviewCode, // get meeting using emoview code (individual)
     getByMeetCode, // get meeting using meet code (collectively)

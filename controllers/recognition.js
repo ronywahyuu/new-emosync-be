@@ -16,6 +16,22 @@ const get = async (req, res, next) => {
   }
 }
 
+const getOverallDataByUserId = async (req, res, next) => {
+  try {
+    const data = await recognition.getOverallDataByUserId({
+      userId: req.params.userId,
+    })
+    if (!data) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+
+}
+
 const getById = async (req, res, next) => {
   try {
     const data = await recognition.getById({
@@ -164,6 +180,7 @@ const remove = async (req, res, next) => {
 module.exports = {
   get,
   getById,
+  getOverallDataByUserId,
   getByIds,
   getOverview,
   getSummary,

@@ -24,6 +24,12 @@ const get = async ({ role, createdBy, searchQuery }) => {
    return await Class.find({ createdBy: createdBy }).sort({ createdAt: 'desc' })
 };
 
+// get by user id
+// const getByUserId = async ({ createdBy, userId }) => {
+//     return await Class.find({ createdBy: createdBy, userId: userId }).sort({ createdAt: 'desc' })
+
+// }
+
 const create = async ({ body, createdBy }) => {
     const data = new Class({ ...body, createdBy })
     return await data.save()

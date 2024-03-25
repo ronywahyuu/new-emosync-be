@@ -3,6 +3,7 @@ const auth = require('../middleware/auth')
 const meeting = require('../controllers/meeting')
 
 router.get('/', auth, meeting.get)
+router.get('/:userId', auth, meeting.getByUserId)
 router.get('/count', auth, meeting.getCount)
 // router.get('/:id', auth, meeting.getById)
 router.get('/class/:meetCode', auth, meeting.getByMeetCode) // get class list

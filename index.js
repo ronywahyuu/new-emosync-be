@@ -102,55 +102,6 @@ app.get('/intervention-words', async (req, res) => {
   }
 });
 
-// generate random intervention words by category
-// app.get('/intervention-words/random', (req, res) => {
-//   try {
-//     const { filter, category } = req.query;
-//     const interventionWords = {
-//       Sad: SAD,
-//       Angry: ANGRY,
-//       Fear: FEAR,
-//       Disgust: DISGUST
-//     };
-//
-//     if (!filter || !category) {
-//       return res.status(400).json({ error: "Missing query parameters: filter and category are required." });
-//     }
-//
-//     const emotionData = interventionWords[filter]; // Get emotion data based on filter
-//     if (!emotionData) {
-//       return res.status(404).json({ error: "Emotion category not found." });
-//     }
-//
-//     const words = emotionData[category]; // Get words array based on category
-//     if (!words) {
-//       return res.status(404).json({ error: "Category not found within the specified emotion." });
-//     }
-//
-//     // Choose between positive and negative based on category
-//     const chosenCategory = category === 'positive' ? 'positive' : 'negative';
-//     // console.log("Chosen category:", chosenCategory);
-//     // console.log("Words:", words);
-//     // console.log("Words category:", words['attention']);
-//
-//     // get random word from either attention, relevance, confidence, or satisfaction
-//
-//
-//     // Get random word from the chosen category
-//     const randomIndex = Math.floor(Math.random() * words['attention'].length);
-//     const randomWord = words['attention'][randomIndex];
-//
-//     if(randomWord.includes('[nama')){
-//       // personalizeMessage('Rony', randomWord)
-//       return res.json({ randomWord: personalizeMessage('Rony', randomWord) });
-//     }
-//     console.log(randomWord)
-//
-//     res.json({ randomWord });
-//   } catch (error) {
-//     res.status(500).json({ error: error.toString() });
-//   }
-// });
 
 app.get('/intervention-words/random', (req, res) => {
   try {
