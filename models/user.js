@@ -16,10 +16,17 @@ const userSchema = new mongoose.Schema(
     },
     picture: String,
     role: {
-      type: String,
+      type: [String],
       enum: ['student', 'teacher', 'superadmin'],
-      default: 'student',
+      default: ['student','teacher'],
     },
+    feedback: [
+      {
+        _id : String,
+        body: String,
+        email: String,
+      }
+    ]
   },
   { timestamps: true }
 )
