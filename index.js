@@ -9,6 +9,7 @@ const recognition = require('./routes/recognition')
 const profile = require('./routes/profile')
 const auth = require('./routes/auth')
 const feedback = require('./routes/feedback');
+const interventionWords = require('./routes/interventionWords');
 const index = require('./routes')
 const cors = require('cors')
 const {sheetsServiceInit, getScoresByEmail, getScoreByEmailFormatted} = require('./services/googleSheetsService')
@@ -49,6 +50,7 @@ app.use('/user', user)
 app.use('/recognition', recognition)
 app.use('/profile', profile)
 app.use('/feedback', feedback)
+app.use('/intervention-words', interventionWords)
 app.use('/auth', auth)
 app.use('/', index)
 app.get('/sheet/list', async (req, res) => {
@@ -89,7 +91,7 @@ app.get('/sheet/formatted', async (req, res) => {
 
 app.get('/intervention-words', async (req, res) => {
   try {
-    const words = [SAD, ANGRY, FEAR, DISGUST]
+    // const words = [SAD, ANGRY, FEAR, DISGUST]
     const data = {
       Sad: SAD,
       Angry: ANGRY,
@@ -103,51 +105,51 @@ app.get('/intervention-words', async (req, res) => {
 });
 
 
-app.get('/intervention-words/random', (req, res) => {
-  try {
-    const { filter, category } = req.query;
-    const interventionWords = {
-      Sad: SAD,
-      Angry: ANGRY,
-      Fear: FEAR,
-      Disgust: DISGUST
-    };
+// app.get('/intervention-words/random', (req, res) => {
+//   try {
+//     const { filter, category } = req.query;
+//     const interventionWords = {
+//       Sad: SAD,
+//       Angry: ANGRY,
+//       Fear: FEAR,
+//       Disgust: DISGUST
+//     };
 
-    if (!filter || !category) {
-      return res.status(400).json({ error: "Missing query parameters: filter and category are required." });
-    }
+//     if (!filter || !category) {
+//       return res.status(400).json({ error: "Missing query parameters: filter and category are required." });
+//     }
 
-    const emotionData = interventionWords[filter]; // Get emotion data based on filter
-    if (!emotionData) {
-      return res.status(404).json({ error: "Emotion category not found." });
-    }
+//     const emotionData = interventionWords[filter]; // Get emotion data based on filter
+//     if (!emotionData) {
+//       return res.status(404).json({ error: "Emotion category not found." });
+//     }
 
-    const words = emotionData[category]; // Get words array based on category
-    if (!words) {
-      return res.status(404).json({ error: "Category not found within the specified emotion." });
-    }
+//     const words = emotionData[category]; // Get words array based on category
+//     if (!words) {
+//       return res.status(404).json({ error: "Category not found within the specified emotion." });
+//     }
 
-    // Combine words from all categories into a single array
-    const allWords = [
-      ...words['attention'],
-      ...words['relevance'],
-      ...words['confidence'],
-      ...words['satisfaction']
-    ];
+//     // Combine words from all categories into a single array
+//     const allWords = [
+//       ...words['attention'],
+//       ...words['relevance'],
+//       ...words['confidence'],
+//       ...words['satisfaction']
+//     ];
 
-    // Get random word from the combined array
-    const randomIndex = Math.floor(Math.random() * allWords.length);
-    const randomWord = allWords[randomIndex];
+//     // Get random word from the combined array
+//     const randomIndex = Math.floor(Math.random() * allWords.length);
+//     const randomWord = allWords[randomIndex];
 
-    if (randomWord.includes('[nama')) {
-      return res.json({ randomWord: personalizeMessage('Rony', randomWord) });
-    }
+//     if (randomWord.includes('[nama')) {
+//       return res.json({ randomWord: personalizeMessage('Rony', randomWord) });
+//     }
 
-    res.json({ randomWord });
-  } catch (error) {
-    res.status(500).json({ error: error.toString() });
-  }
-});
+//     res.json({ randomWord });
+//   } catch (error) {
+//     res.status(500).json({ error: error.toString() });
+//   }
+// });
 
 app.get('/intervention-words/all', (req, res) => {
   try {
