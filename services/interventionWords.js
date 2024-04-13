@@ -1,20 +1,35 @@
-const { personalizeMessage } = require('../utils/helper')
-const { SAD, ANGRY, FEAR, DISGUST } = require('../utils/interventionWords')
+const {personalizeMessage} = require('../utils/helper')
+const {SAD, ANGRY, FEAR, DISGUST} = require('../utils/interventionWords')
 
-const getRandom = async ({ filter, category, name }) => {
-  if (!filter || !category) {
-    throw new Error('Missing parameters: filter and category are required.')
-  }
-  const interventionWords = {
+const getList = async () => {
+  const data = {
     Sad: SAD,
     Angry: ANGRY,
     Fear: FEAR,
     Disgust: DISGUST,
   }
 
+  if (!data) {
+    throw new Error('Error fetching data.')
+  }
+
+  return data
+}
+const getRandom = async ({filter, category, name}) => {
+  if (!filter || !category) {
+    throw new Error('Missing parameters: filter and category are required.')
+  }
+  const interventionWords = {
+    sad: SAD,
+    angry: ANGRY,
+    fear: FEAR,
+    disgust: DISGUST,
+  }
+
   const emotionData = interventionWords[filter]
   if (!emotionData) {
     throw new Error('Emotion category not found.')
+    // res.status(404).json({ error: "Emotion category not found." });
   }
 
   const words = emotionData[category]
@@ -40,5 +55,6 @@ const getRandom = async ({ filter, category, name }) => {
 }
 
 module.exports = {
+  getList,
   getRandom,
 }
