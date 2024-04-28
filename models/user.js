@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const Meeting = require('./meeting')
 const Recognition = require('./recognition')
-const cloudinary = require('../utils/cloudinary')
+// const cloudinary = require('../utils/cloudinary')
 
 const userSchema = new mongoose.Schema(
   {
@@ -39,9 +39,9 @@ userSchema.pre('remove', async function () {
   const meetingIds = await Meeting.find({ createdBy: this._id }).distinct('_id')
   return Promise.all([
     Recognition.deleteMany({ meetingId: { $in: meetingIds } }),
-    meetingIds.forEach(async (meetingId) => {
-      await cloudinary.api.delete_resources_by_prefix(meetingId.toString())
-    }),
+    // meetingIds.forEach(async (meetingId) => {
+    //   await cloudinary.api.delete_resources_by_prefix(meetingId.toString())
+    // }),
     Meeting.deleteMany({ createdBy: this._id }),
   ])
 })

@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Recognition = require('../models/recognition')
 const Meeting = require('../models/meeting')
 const User = require('../models/user')
-const cloudinary = require('../utils/cloudinary')
+// const cloudinary = require('../utils/cloudinary')
 const io = require('../utils/socketio')
 
 let recognitionInterval = {}
@@ -868,12 +868,12 @@ const getArchive = async ({ limit, emoviewCode }) => {
 }
 
 const create = async ({ userId, image, rest }) => {
-  const { secure_url } = await cloudinary.uploader.upload(image, {
-    folder: `${rest.emoviewCode}/${userId}`
-  })
+  // const { secure_url } = await cloudinary.uploader.upload(image, {
+  //   folder: `${rest.emoviewCode}/${userId}`
+  // })
   const recognition = new Recognition({
     ...rest,
-    image: secure_url,
+    image: "",
     userId
   })
   const data = await recognition.save()
@@ -914,16 +914,18 @@ const update = async ({ emoviewCode, isStart, code }) => {
 const remove = async ({ emoviewCode }) => {
   const data = await Recognition.findOne({ emoviewCode: emoviewCode })
   if (!data) return
-  const public_id = data.image.substring(
-    data.image.indexOf('.jpg') - 20,
-    data.image.indexOf('.jpg')
-  )
-  await Promise.all([
-    cloudinary.uploader.destroy(
-      `${data.meetingId}/${data.userId}/${public_id}`
-    ),
-    data.remove()
-  ])
+  // const public_id = data.image.substring(
+  //   data.image.indexOf('.jpg') - 20,
+  //   data.image.indexOf('.jpg')
+  // )
+  // await Promise.all([
+  //   cloudinary.uploader.destroy(
+  //     `${data.meetingId}/${data.userId}/${public_id}`
+  //   ),
+  //   data.remove()
+  // ])
+
+  
   return data
 }
 
