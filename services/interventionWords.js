@@ -26,7 +26,7 @@ const getRandom = async ({filter, category, name}) => {
     disgust: DISGUST,
   }
 
-  const emotionData = interventionWords[filter]
+  const emotionData = interventionWords[filter.toLowerCase()]
   if (!emotionData) {
     throw new Error('Emotion category not found.')
     // res.status(404).json({ error: "Emotion category not found." });
