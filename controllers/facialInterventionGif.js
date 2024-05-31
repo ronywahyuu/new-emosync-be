@@ -47,14 +47,14 @@ const getSingleDefaultFacialInterventionGif = async (req, res, next) => {
 
 const getSingleByTypeOfEmotion = async (req, res, next) => {
   try {
-    const { emotion } = req.query;
+    const { emotion, gender } = req.query;
     if (!emotion) {
       return res.status(400).json({
         message: 'Facial Intervention Gif not found',
         data: [],
       })
     }
-    const data = await facialInterventionGif.getSingleByTypeOfEmotion(emotion);
+    const data = await facialInterventionGif.getSingleByTypeOfEmotion(emotion, gender);
 
     if (!data) {
       return res.status(404).json({

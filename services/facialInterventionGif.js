@@ -115,8 +115,10 @@ const getSingleDefaultFacialInterventionGif = async (gender) => {
   }
 }
 
-const getSingleByTypeOfEmotion = async (emotion = "Anger2Neutral") => {
-  const localPath = `public/pedagogic-agent/P/${emotion}.gif`
+const getSingleByTypeOfEmotion = async (emotion = "Anger2Neutral", gender = 'female') => {
+  const selectedGender = gender === 'male' ? 'L' : 'P'
+
+  const localPath = `public/pedagogic-agent/${selectedGender}/${emotion}.gif`
   const base64Image = fs.readFileSync(localPath, { encoding: 'base64' })
   const selectedFileName = localPath.split('/').pop()
   console.log(`Selected file name: ${selectedFileName}`)
