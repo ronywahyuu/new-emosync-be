@@ -1,5 +1,6 @@
 
 const fs = require('fs')
+const CONFIG = require('../config')
 
 const getListGiphy = async (search) => {
   const data = [
@@ -118,7 +119,8 @@ const getSingleDefaultFacialInterventionGif = async (gender) => {
 const getSingleByTypeOfEmotion = async (emotion = "Anger2Neutral", gender = 'female') => {
   const selectedGender = gender === 'male' ? 'L' : 'P'
 
-  const localPath = `public/pedagogic-agent/${selectedGender}/${emotion}.gif`
+  // const localPath = `public/pedagogic-agent/${selectedGender}/${emotion}.gif`
+  const localPath = `${CONFIG.PEDAGOGIC_AGENT_PATH}/${selectedGender}/${emotion}.gif`
   const base64Image = fs.readFileSync(localPath, { encoding: 'base64' })
   const selectedFileName = localPath.split('/').pop()
   console.log(`Selected file name: ${selectedFileName}`)
