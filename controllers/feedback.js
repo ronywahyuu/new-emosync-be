@@ -12,6 +12,17 @@ const create = async (req, res, next) => {
     next(error)
   }
 }
+
+const getAll = async (req, res, next) => {
+  try {
+    const data = await feedback.getAll()
+
+    return res.status(200).send({ data })
+  } catch (error) {
+    next(error)
+  }
+}
 module.exports = {
   create,
+  getAll,
 }

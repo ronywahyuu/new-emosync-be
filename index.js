@@ -11,6 +11,7 @@ const auth = require('./routes/auth')
 const feedback = require('./routes/feedback');
 const interventionWords = require('./routes/interventionWords');
 const facialInterventions = require('./routes/facialInterventionGif');
+const miniSurvey = require('./routes/mini-survey');
 const index = require('./routes')
 const cors = require('cors')
 const {sheetsServiceInit, getScoresByEmail, getScoreByEmailFormatted} = require('./services/googleSheetsService')
@@ -51,6 +52,7 @@ app.use('/user', user)
 app.use('/recognition', recognition)
 app.use('/profile', profile)
 app.use('/feedback', feedback)
+app.use('/mini-survey', miniSurvey)
 app.use('/intervention-words', interventionWords)
 app.use('/facial-interventions', facialInterventions)
 app.use('/auth', auth)

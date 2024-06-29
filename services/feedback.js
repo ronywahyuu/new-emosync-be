@@ -15,6 +15,13 @@ const create = async ({ body, email, host }) => {
   })
 }
 
+const getAll = async () => {
+  const feedback = await Feedback.find()
+
+  return feedback
+}
+
 module.exports = {
   create,
+  getAll,
 }
