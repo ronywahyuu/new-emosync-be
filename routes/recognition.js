@@ -3,6 +3,9 @@ const auth = require('../middleware/auth')
 const recognition = require('../controllers/recognition')
 
 router.get('/overview', auth, recognition.getOverview)
+
+router.get('/overall/:userId',auth, recognition.getOverallDataByUserId)
+
 router.get('/summary', auth, recognition.getSummary)
 router.get('/:emoviewCode', auth, recognition.get)
 router.get('/:emoviewCode/:userId', auth, recognition.getById)

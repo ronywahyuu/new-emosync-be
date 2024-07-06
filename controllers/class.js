@@ -6,7 +6,8 @@ const get = async (req, res, next) => {
       'https://customclaim.com/role': role,
       'https://customclaim.com/id': createdBy,
     } = req.auth.payload
-    const data = await _class.get({ role, createdBy })
+    const searchQuery = req.query.q
+    const data = await _class.get({ role, createdBy, searchQuery })
     if (!data.length) {
       return res.status(404).send({ message: 'Data not found!' })
     }
@@ -33,6 +34,25 @@ const getByMeetCode = async (req, res, next) => {
     next(error)
   }
 }
+
+// get class by user id
+const getByUserId = async (req, res, next) => {
+  try {
+    const {
+      'https://customclaim.com/id': createdBy,
+    } = req.auth.payload
+    const userId = req.params.userId
+    const data = await _class.getByUserId({ createdBy, userId })
+    if (!data.length) {
+      return res.status(404).send({ message: 'Data not found!' })
+    }
+    return res.status(200).send({ data })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+}
+
 
 const create = async (req, res, next) => {
   try {
@@ -80,4 +100,5 @@ module.exports = {
   create,
   update,
   remove,
+  getByUserId,
 }
