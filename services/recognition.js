@@ -87,13 +87,14 @@ const get = async ({ emoviewCode, limit }) => {
       {
         $group: {
           _id: null,
-          positive: { $sum: { $add: ['$happy', '$surprised'] } },
+          positive: { $sum: { $add: ['$happy', '$surprised', '$neutral'] } },
           negative: {
             $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] }
           },
           count: {
             $sum: {
               $add: [
+                '$neutral',
                 '$happy',
                 '$sad',
                 '$angry',
@@ -521,13 +522,14 @@ const getById = async ({ emoviewCode, userId, limit }) => {
       {
         $group: {
           _id: null,
-          positive: { $sum: { $add: ['$happy', '$surprised'] } },
+          positive: { $sum: { $add: ['$happy', '$surprised', '$neutral'] } },
           negative: {
             $sum: { $add: ['$sad', '$angry', '$fearful', '$disgusted'] }
           },
           count: {
             $sum: {
               $add: [
+                '$neutral',
                 '$happy',
                 '$sad',
                 '$angry',
