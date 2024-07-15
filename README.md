@@ -57,3 +57,69 @@ npm run dev
 7. Buka browser dan akses `http://localhost:3000` untuk melihat aplikasi yang telah dijalankan.
 
 
+## Penjelasan File dan Direktori
+
+```
+new-emosync-be/
+├── .env
+├── .env.example
+├── .eslintrc.js
+├── .gitignore
+├── .prettierrc
+├── config.js
+├── index.js
+├── LICENSE
+├── package.json
+├── README.md
+├── vercel.json
+├── controllers/
+│   ├── AuthController.js
+│   ├── UserController.js
+├── middlewares/
+│   ├── Auth.js
+├── models/
+│   ├── User.js
+├── routes/
+│   ├── AuthRoutes.js
+│   ├── UserRoutes.js
+```
+
+#### Root Files
+
+- `new-emosync-be\.env`: Berisi variabel environment untuk aplikasi, seperti string koneksi database, API keys, dan opsi konfigurasi lain yang tidak boleh di-hard-code ke dalam kode sumber aplikasi.
+- `new-emosync-be\.eslintrc.js`: File konfigurasi untuk ESLint, sebuah alat untuk mengidentifikasi dan melaporkan pola dalam kode ECMAScript/JavaScript, dengan tujuan membuat kode lebih konsisten dan menghindari bug.
+- `new-emosync-be\.gitignore`: Menentukan file-file yang sengaja tidak dilacak yang harus diabaikan oleh Git.
+- `new-emosync-be\.prettierrc`: File konfigurasi untuk Prettier, sebuah code formatter yang opinionated, memastikan bahwa semua kode yang dikeluarkan sesuai dengan gaya yang konsisten.
+- `new-emosync-be\config.js`: Kemungkinan berisi pengaturan konfigurasi untuk aplikasi, mungkin termasuk nilai default untuk variabel environment.
+- `new-emosync-be\index.js`: Titik masuk dari aplikasi. Ini mengatur express server, koneksi database, middleware, dan rute.
+- `new-emosync-be\LICENSE`: Berisi lisensi di bawah mana perangkat lunak didistribusikan.
+- `new-emosync-be\package.json`: Mencantumkan dependensi proyek dan berisi metadata lain yang relevan dengan proyek seperti skrip untuk menjalankan, membangun, dan menguji aplikasi.
+- `new-emosync-be\README.md`: Menyediakan gambaran umum proyek, termasuk petunjuk pemasangan, fitur, dan informasi penting lainnya.
+- `new-emosync-be\vercel.json`: File konfigurasi untuk men-deploy aplikasi dengan Vercel, layanan hosting untuk aplikasi web.
+
+#### Direktori `controllers`
+
+Berisi file-file JavaScript yang mendefinisikan logika kontroler untuk aplikasi, seperti:
+
+- `new-emosync-be\controllers\AuthController.js`: Menangani logika autentikasi pengguna, seperti login, logout, dan pendaftaran.
+- `new-emosync-be\controllers\UserController.js`: Mengelola operasi terkait pengguna, seperti pengambilan informasi pengguna dan pembaruan profil.
+
+#### Direktori `middlewares`
+
+Berisi middleware custom yang memproses permintaan HTTP sebelum mencapai kontroler, misalnya:
+
+- `new-emosync-be\middlewares\Auth.js`: Middleware yang memeriksa apakah pengguna telah diautentikasi sebelum memberikan akses ke rute tertentu.
+
+#### Direktori `models`
+
+Berisi definisi model data, mungkin menggunakan ORM seperti Sequelize atau Mongoose, misalnya:
+
+- `new-emosync-be\models\User.js`: Definisi skema atau model untuk pengguna, termasuk properti dan metode yang terkait dengan pengguna dalam aplikasi.
+
+#### Direktori `routes`
+
+Berisi definisi rute yang menghubungkan URL tertentu dengan logika kontroler, misalnya:
+
+- `new-emosync-be\routes\AuthRoutes.js`: Mengelola rute-rute yang berkaitan dengan autentikasi.
+- `new-emosync-be\routes\UserRoutes.js`: Menangani rute-rute terkait dengan operasi pengguna.
+
