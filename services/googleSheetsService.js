@@ -3,7 +3,12 @@ const {google} = require('googleapis');
 const serviceAccountKeyFile = "./project-emosync-5cc7841a1889.json";
 const sheetId = process.env.GOOGLE_SHEETS_ID
 const tabName = 'Form Responses 1'
-const range = 'B:AH'
+
+// yg nika
+// const range = 'B:AH'
+
+// yg syifa 
+const range = 'A:AI'
 
 async function _getGoogleSheetClient() {
   const auth = new google.auth.GoogleAuth({
@@ -47,7 +52,12 @@ async function sheetsServiceInit() {
   for (const category of categories) {
     const categoryData = data.slice(1).map((item) => {
       const categoryPositionData = item.slice(category.start, category.end);
-      const getOnlyEmail = item[32]; // Fetch email from the current row
+
+      // yg nika
+      // const getOnlyEmail = item[32]; // Fetch email from the current row
+
+      // yg syifa
+      const getOnlyEmail = item[1]; // Fetch email from the current row
 
       return {
         email: getOnlyEmail,
@@ -68,23 +78,45 @@ async function getScoresByEmail(email) {
   const googleSheetClient = await _getGoogleSheetClient();
   const data = await _readGoogleSheet(googleSheetClient, sheetId, tabName, range);
 
+
+  // yg nika
+  // const categories = [
+  //   {key: 'attentionPositive', start: 0, end: 4},
+  //   {key: 'attentionNegative', start: 4, end: 8},
+  //   {key: 'relevancePositive', start: 8, end: 12},
+  //   {key: 'relevanceNegative', start: 12, end: 16},
+  //   {key: 'confidencePositive', start: 16, end: 20},
+  //   {key: 'confidenceNegative', start: 20, end: 24},
+  //   {key: 'satisfactionPositive', start: 24, end: 28},
+  //   {key: 'satisfactionNegative', start: 28, end: 32}
+  // ];
+  
+  // yg syifa
   const categories = [
-    {key: 'attentionPositive', start: 0, end: 4},
-    {key: 'attentionNegative', start: 4, end: 8},
-    {key: 'relevancePositive', start: 8, end: 12},
-    {key: 'relevanceNegative', start: 12, end: 16},
-    {key: 'confidencePositive', start: 16, end: 20},
-    {key: 'confidenceNegative', start: 20, end: 24},
-    {key: 'satisfactionPositive', start: 24, end: 28},
-    {key: 'satisfactionNegative', start: 28, end: 32}
+    {key: 'attentionPositive', start: 3, end: 7},
+    {key: 'attentionNegative', start: 7, end: 11},
+    {key: 'relevancePositive', start: 11, end: 15},
+    {key: 'relevanceNegative', start: 15, end: 19},
+    {key: 'confidencePositive', start: 19, end: 23},
+    {key: 'confidenceNegative', start: 23, end: 27},
+    {key: 'satisfactionPositive', start: 27, end: 31},
+    {key: 'satisfactionNegative', start: 31, end: 35}
   ];
 
   const scoresByEmail = {};
 
+  // console.log(data[1])
   for (const category of categories) {
     const categoryData = data.slice(1).map((item) => {
+      // console.log(item[3])
+      // console.log(item)
       const categoryPositionData = item.slice(category.start, category.end);
-      const itemEmail = item[32]; // Fetch email from the current row
+
+      // yg nika
+      // const itemEmail = item[32]; // Fetch email from the current row
+
+      // yg syifa
+      const itemEmail = item[1]; // Fetch email from the current row
 
       if (itemEmail === email) {
         return {
