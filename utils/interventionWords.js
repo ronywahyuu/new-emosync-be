@@ -75,14 +75,14 @@ const ANGRY = {
       'Tetap tenang, selalu ingat tujuanmu di awal! 💪',
       'Setelah tantangan yang berat, kamu pasti akan lebih kuat 💪',
       'Semua masalah pasti akan ada jalan keluarnya, ini tantangan agar kamu bisa lebih baik lagi 😃',
-      'Chill dulu lah, cuman berapa sks doang nanti juga beres🤙',
+      'Santai dulu lah, cuman berapa sks doang nanti juga beres🤙',
     ],
     confidence: [
       'Amarah ini tidak akan membebanimu, alihkan energi itu untuk menumbuhkan semangat 🔥',
       'Masa-masa ini pasti akan bisa kamu lewati! 💪',
       'Jadikan ledakan amarahmu, kaya ledakan petir yang menyinari kegelapan! ⚡',
       'Udah-udah ayo kamu pasti bisa fokus lagi 🙄',
-      'Chill dulu lahh 🤙',
+      'Santai dulu lahh 🤙',
     ],
     satisfaction: [
       'Terima kasih karena sudah bertahan, tetap semangat! 😃',
@@ -112,7 +112,7 @@ const ANGRY = {
       'Kamu pegang kendali atas dirimu, jadi jangan sampai amarah yang ngendaliin kamu! 😉',
       'Udahh ayo kamu pasti bisa fokus lagi, jangan marah gitu ah 🙄',
       'Udah stop ya jangan marah terus, kamu harus fokus belajar lagi 😮‍💨‍',
-      'Gaperlu emosi, chill dulu lahh 🤙',
+      'Gaperlu emosi, santai dulu lahh 🤙',
     ],
     satisfaction: [
       'Kamu itu keren, kamu harus mengubah amarahmu menjadi kekuatan untuk mencapai tujuanmu! 💪😠',
